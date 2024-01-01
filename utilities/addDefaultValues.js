@@ -29,5 +29,3 @@ export const addDefaultValues = (schema, document) => {
   console.log(document);
   return document;
 };
-
-addDefaultValues({}, {});
