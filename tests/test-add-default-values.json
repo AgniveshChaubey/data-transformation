@@ -35,44 +35,45 @@
                         "country": {
                             "type": "object",
                             "properties": {
-                                "nested1": {
-                                    "type": "string",
-                                    "default": "nested1"
+                                "name": {
+                                    "type": "string"
+                                },
+                                "zip-code": {
+                                    "type": "string"
                                 }
-                            }
+                            },
+                            "default": "India"
                         }
                     },
                     "default": {
-                        "Mota Bazar": "V.V.N"
+                        "country": {
+                            "name": "Aus",
+                            "zip-code": "000000"
+                        }
                     }
                 },
                 "hobbies": {
                     "type": "array",
                     "items": [
                         {
-                            "type": "object",
-                            "properties": {
-                                "h1": {
-                                    "type": "string",
-                                    "default": "Singing"
-                                }
-                            }
+                            "type": "string"
                         },
                         {
-                            "type": "object",
-                            "properties": {
-                                "h2": {
-                                    "type": "string",
-                                    "default": "Riding"
-                                }
-                            }
+                            "type": "number"
                         },
                         {
-                            "type": "string",
-                            "default": "Default Hobby"
+                            "enum": [
+                                "A",
+                                "B",
+                                "C"
+                            ]
                         }
                     ],
-                    "minItems": 0
+                    "default": [
+                        "Football",
+                        2,
+                        "A"
+                    ]
                 }
             }
         },

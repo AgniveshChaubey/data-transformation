@@ -26,7 +26,7 @@ export const addDefaultValues = (schema, document) => {
   };
 
   addDefauls(schema, document);
-  // console.log(document);
+  console.log(document);
   return document;
 };
 
