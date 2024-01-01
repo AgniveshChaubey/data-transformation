@@ -19,5 +19,72 @@
             "name": "Agnivesh",
             "age": 21
         }
+    },
+    {
+        "name": "Add default to nested properties",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "hostelName": {
+                    "type": "string",
+                    "default": "AVJ"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "country": {
+                            "type": "object",
+                            "properties": {
+                                "nested1": {
+                                    "type": "string",
+                                    "default": "nested1"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "Mota Bazar": "V.V.N"
+                    }
+                },
+                "hobbies": {
+                    "type": "array",
+                    "items": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "h1": {
+                                    "type": "string",
+                                    "default": "Singing"
+                                }
+                            }
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "h2": {
+                                    "type": "string",
+                                    "default": "Riding"
+                                }
+                            }
+                        },
+                        {
+                            "type": "string",
+                            "default": "Default Hobby"
+                        }
+                    ],
+                    "minItems": 0
+                }
+            }
+        },
+        "document": {},
+        "expected": {
+            "hostelName": "AVJ",
+            "address": {
+                "country": {
+                    "nested1": "nested1"
+                },
+                "Mota Bazar": "V.V.N"
+            }
+        }
     }
 ]

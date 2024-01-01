@@ -7,7 +7,6 @@ export const addDefaultValues = (schema, document) => {
     console.log("Instance is invalid :-(");
   } else console.log("Instance is valid :-)");
 
-  // console.log(document);
   const addDefauls = (schema, doc) => {
     if (typeof schema === "object" && !Array.isArray(schema)) {
       for (const key in schema.properties) {
@@ -30,3 +29,5 @@ export const addDefaultValues = (schema, document) => {
   // console.log(document);
   return document;
 };
+
+addDefaultValues({}, {});
