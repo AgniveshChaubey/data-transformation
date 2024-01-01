@@ -1,0 +1,23 @@
+[
+    {
+        "name": "Add default to missing properties",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "default": "Agnivesh"
+                },
+                "age": {
+                    "type": "number",
+                    "default": 21
+                }
+            }
+        },
+        "document": {},
+        "expected": {
+            "name": "Agnivesh",
+            "age": 21
+        }
+    }
+]
