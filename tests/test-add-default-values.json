@@ -36,19 +36,14 @@
                             "type": "object",
                             "properties": {
                                 "name": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "default": "India"
                                 },
                                 "zip-code": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "default": "388120"
                                 }
-                            },
-                            "default": "India"
-                        }
-                    },
-                    "default": {
-                        "country": {
-                            "name": "Aus",
-                            "zip-code": "000000"
+                            }
                         }
                     }
                 },
@@ -82,10 +77,15 @@
             "hostelName": "AVJ",
             "address": {
                 "country": {
-                    "nested1": "nested1"
-                },
-                "Mota Bazar": "V.V.N"
-            }
+                    "name": "India",
+                    "zip-code": "388120"
+                }
+            },
+            "hobbies": [
+                "Football",
+                2,
+                "A"
+            ]
         }
     }
 ]

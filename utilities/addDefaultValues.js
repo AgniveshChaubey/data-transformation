@@ -3,9 +3,7 @@ const ajv = new Ajv();
 
 export const addDefaultValues = (schema, document) => {
   const isValid = ajv.validate(schema, document);
-  if (!isValid) {
-    console.log("Instance is invalid :-(");
-  } else console.log("Instance is valid :-)");
+  if (!isValid) console.warn(ajv.errors);
 
   const addDefauls = (schema, doc) => {
     if (typeof schema === "object" && !Array.isArray(schema)) {
@@ -19,6 +17,9 @@ export const addDefaultValues = (schema, document) => {
           typeof schema.properties[key] === "object" &&
           !Array.isArray(schema.properties[key])
         ) {
+          if (doc[key] === undefined) {
+            doc[key] = {};
+          }
           addDefauls(schema.properties[key], doc[key]);
         }
       }
@@ -26,6 +27,5 @@ export const addDefaultValues = (schema, document) => {
   };
 
   addDefauls(schema, document);
-  console.log(document);
   return document;
 };

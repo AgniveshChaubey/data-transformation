@@ -1,0 +1,25 @@
+[
+    {
+        "name": "Remove properties in the document that are not described in schema",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "age": {
+                    "type": "number"
+                }
+            }
+        },
+        "document": {
+            "name": "Agnivesh",
+            "age": 21,
+            "lastName": "Chaubey"
+        },
+        "expected": {
+            "name": "Agnivesh",
+            "age": 21
+        }
+    }
+]
