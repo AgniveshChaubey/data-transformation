@@ -13,6 +13,11 @@
     },
     "tests": [
         {
+            "description": "When the schema is applied to an empty object, it should return an empty object",
+            "instance": {},
+            "expected": {}
+        },
+        {
             "description": "When the schema is applied to an instance having 'foo' property (which is not mention in schema), the 'foo' property should be removed from the instance",
             "instance": {
                 "name": "John",
