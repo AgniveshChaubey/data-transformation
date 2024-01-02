@@ -9,7 +9,9 @@
             "bar": {
                 "type": "string"
             },
-            "isActive": "boolean"
+            "isActive": {
+                "type": "boolean"
+            }
         }
     },
     "tests": [
