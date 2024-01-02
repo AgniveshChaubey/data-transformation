@@ -1,25 +1,28 @@
-[
-    {
-        "name": "Remove properties in the document that are not described in schema",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "age": {
-                    "type": "number"
-                }
+{
+    "description": "Remove 'foo' property from document which is not mentioned in schema",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string"
+            },
+            "age": {
+                "type": "number"
             }
-        },
-        "document": {
-            "name": "Agnivesh",
-            "age": 21,
-            "lastName": "Chaubey"
-        },
-        "expected": {
-            "name": "Agnivesh",
-            "age": 21
         }
-    }
-]
+    },
+    "tests": [
+        {
+            "description": "When the schema is applied to an instance having 'foo' property (which is not mention in schema), the 'foo' property should be removed from the instance",
+            "instance": {
+                "name": "John",
+                "age": 21,
+                "foo": "john@example.com"
+            },
+            "expected": {
+                "name": "John",
+                "age": 21
+            }
+        }
+    ]
+}

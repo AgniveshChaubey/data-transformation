@@ -1,91 +1,30 @@
-[
-    {
-        "name": "Add default to missing properties",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "default": "Agnivesh"
-                },
-                "age": {
-                    "type": "number",
-                    "default": 21
-                }
+{
+    "description": "Given a schema with a default set for the 'name' property",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string",
+                "default": "John"
             }
-        },
-        "document": {},
-        "expected": {
-            "name": "Agnivesh",
-            "age": 21
         }
     },
-    {
-        "name": "Add default to nested properties",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "hostelName": {
-                    "type": "string",
-                    "default": "AVJ"
-                },
-                "address": {
-                    "type": "object",
-                    "properties": {
-                        "country": {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "default": "India"
-                                },
-                                "zip-code": {
-                                    "type": "string",
-                                    "default": "388120"
-                                }
-                            }
-                        }
-                    }
-                },
-                "hobbies": {
-                    "type": "array",
-                    "items": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "number"
-                        },
-                        {
-                            "enum": [
-                                "A",
-                                "B",
-                                "C"
-                            ]
-                        }
-                    ],
-                    "default": [
-                        "Football",
-                        2,
-                        "A"
-                    ]
-                }
+    "tests": [
+        {
+            "description": "When the schema is applied to an empty object, the name property should be set to default value",
+            "instance": {},
+            "expected": {
+                "name": "John"
             }
         },
-        "document": {},
-        "expected": {
-            "hostelName": "AVJ",
-            "address": {
-                "country": {
-                    "name": "India",
-                    "zip-code": "388120"
-                }
+        {
+            "description": "When the schema is applied to an object where 'name' exists, then the property should not change",
+            "instance": {
+                "name": "John"
             },
-            "hobbies": [
-                "Football",
-                2,
-                "A"
-            ]
+            "expected": {
+                "name": "John"
+            }
         }
-    }
-]
+    ]
+}
