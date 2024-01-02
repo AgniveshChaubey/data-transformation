@@ -1,10 +1,6 @@
-import Ajv from "ajv";
-const ajv = new Ajv();
-
 export const convertFormQueryString = (schema, queryString) => {
   const urlSearchParams = new URLSearchParams(queryString);
   const resultJson = {};
-  console.log(urlSearchParams)
 
   for (const key in schema.properties) {
     if (urlSearchParams.has(key)) {
@@ -30,16 +26,3 @@ export const convertFormQueryString = (schema, queryString) => {
   }
   return resultJson;
 };
-
-const schema = {
-  properties: {
-    foo: { type: "number" },
-    bar: { type: "string" },
-  },
-};
-
-const queryString = "foo=42&bar=hello";
-
-const result = convertFormQueryString(schema, queryString);
-
-console.log(result);

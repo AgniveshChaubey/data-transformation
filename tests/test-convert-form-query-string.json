@@ -1,0 +1,43 @@
+{
+    "description": "Convert form post query string to JSON, typecasting values based on JSON Schema",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "foo": {
+                "type": "number"
+            },
+            "bar": {
+                "type": "string"
+            },
+            "isActive": "boolean"
+        }
+    },
+    "tests": [
+        {
+            "description": "If the schema includes all query string keys, the utility returns an object with typecasted values based on the schema.",
+            "queryString": "foo=42&bar=hello&isActive=true",
+            "expected": {
+                "foo": 42,
+                "bar": "hello",
+                "isActive": true
+            }
+        },
+        {
+            "description": "In the presence of a partial match between schema properties and query string keys, the utility returns an object with matched keys and typecasted values.",
+            "queryString": "foo=10&bar=hey",
+            "expected": {
+                "foo": 10,
+                "bar": "hey"
+            }
+        },
+        {
+            "description": "When the query string contains keys not defined in the schema, the utility returns an object with only the schema-defined keys and their typecasted values.",
+            "queryString": "name=John&foo=42&bar=hello&isActive=false",
+            "expected": {
+                "foo": 42,
+                "bar": "hello",
+                "isActive": false
+            }
+        }
+    ]
+}
