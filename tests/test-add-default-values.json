@@ -63,6 +63,34 @@
         ]
     },
     {
+        "description": "Add defaults to array",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "numbers": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "default": [
+                        40
+                    ]
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "When the schema is applied to an object with an array, default values should be added to array items",
+                "instance": {},
+                "expected": {
+                    "numbers": [
+                        40
+                    ]
+                }
+            }
+        ]
+    },
+    {
         "description": "Given a schema with a default set for the required properties only",
         "schema": {
             "type": "object",

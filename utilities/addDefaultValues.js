@@ -32,7 +32,7 @@ const addDefaultsToObject = (obj, schema) => {
       const value = schema.properties[key];
 
       if (obj[key] === undefined || obj[key] === null) {
-        // if (value.type === "object" && !Array.isArray(value)) {
+        //future debugging - if (value.type === "object" && !Array.isArray(value)) {
         if (value.type === "object") {
           obj[key] = {};
           addDefaultsToObject(obj[key], value);
@@ -44,19 +44,19 @@ const addDefaultsToObject = (obj, schema) => {
   }
 };
 
-const addDefaultsToArray = (arr, schema) => {
-  if (schema.items && Array.isArray(arr)) {
-    for (let i = 0; i < arr.length; i++) {
-      if (schema.items.default !== undefined) {
-        arr[i] = schema.items.default;
-      }
+// const addDefaultsToArray = (arr, schema) => {
+//   if (schema.items && Array.isArray(arr)) {
+//     for (let i = 0; i < arr.length; i++) {
+//       if (schema.items.default !== undefined) {
+//         arr[i] = schema.items.default;
+//       }
 
-      if (typeof schema.items === "object" && !Array.isArray(schema.items)) {
-        addDefaultsToObject(arr[i], schema.items);
-      }
-    }
-  }
-};
+//       if (typeof schema.items === "object" && !Array.isArray(schema.items)) {
+//         addDefaultsToObject(arr[i], schema.items);
+//       }
+//     }
+//   }
+// };
 
 export const addDefaultValuesToDocument = (schema, document) => {
   let parsedSchema;
@@ -74,11 +74,11 @@ export const addDefaultValuesToDocument = (schema, document) => {
   const addDefaults = (doc, parentSchema) => {
     addDefaultsToObject(doc, parentSchema);
 
-    if (parentSchema.items) {
-      if (Array.isArray(doc)) {
-        addDefaultsToArray(doc, parentSchema);
-      }
-    }
+    // if (parentSchema.items) {
+    //   if (Array.isArray(doc)) {
+    //     addDefaultsToArray(doc, parentSchema);
+    //   }
+    // }
   };
 
   try {
@@ -92,18 +92,10 @@ export const addDefaultValuesToDocument = (schema, document) => {
 const schema = {
   type: "object",
   properties: {
-    person: {
-      type: "object",
-      properties: {
-        name: {
-          type: "string",
-          default: "John",
-        },
-        age: {
-          type: "number",
-          default: 25,
-        },
-      },
+    numbers: {
+      type: "array",
+      items: { type: "number" },
+      default: "42"
     },
   },
 };
