@@ -1,9 +1,9 @@
-/* eslint-disable no-undef */
 import Ajv from "ajv";
 const ajv = new Ajv();
 
 export const addDefaultValues = (schema, document) => {
   const isValid = ajv.validate(schema, document);
+  // eslint-disable-next-line no-console
   if (!isValid) console.warn(ajv.errors);
 
   const addDefaults = (schema, doc) => {
@@ -27,7 +27,7 @@ export const addDefaultValues = (schema, document) => {
     }
   };
   if (schema.required) {
-    let modifiedSchema = { ...schema };
+    const modifiedSchema = { ...schema };
     for (const key in schema.properties) {
       if (!schema.required.includes(key)) {
         delete modifiedSchema.properties[key];

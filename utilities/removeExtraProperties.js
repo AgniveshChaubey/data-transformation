@@ -1,4 +1,3 @@
-/* eslint-disable no-prototype-builtins */
 import Ajv from "ajv";
 const ajv = new Ajv();
 
@@ -11,7 +10,7 @@ export const removeExtraProperties = (schema, document) => {
   const removeExtras = (schema, doc) => {
     if (typeof schema === "object" && !Array.isArray(schema)) {
       if (schema.properties) {
-        for (let key in doc) {
+        for (const key in doc) {
           if (!(key in schema.properties)) {
             delete doc[key];
           } else if (
