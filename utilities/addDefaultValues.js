@@ -1,7 +1,7 @@
 import Ajv from "ajv";
 const ajv = new Ajv();
 
-const parseAndValidateSchema = (schema) => {
+const parseAndValidateSchema = (schema, document) => {
   if (typeof schema !== "object" || schema === null) {
     throw new Error("Invalid Json Schema: Schema must be an object");
   }
@@ -56,37 +56,33 @@ const addDefaultsToArray = (arr, schema) => {
   }
 };
 
-export const addDefaultValues = (schema, document) => {
-  const addDefaults = (schema, doc) => {
-    if (typeof schema === "object" && !Array.isArray(schema)) {
-      for (const key in schema.properties) {
-        if (
-          doc[key] === undefined &&
-          schema.properties[key].default !== undefined
-        ) {
-          doc[key] = schema.properties[key].default;
-        } else if (
-          typeof schema.properties[key] === "object" &&
-          !Array.isArray(schema.properties[key])
-        ) {
-          if (doc[key] === undefined) {
-            doc[key] = {};
-          }
-          addDefaults(schema.properties[key], doc[key]);
-        }
+export const addDefaultValuesToDocument = (schema, document) => {
+  let parsedSchema;
+  try {
+    parsedSchema = parseAndValidateSchema(schema, document);
+  } catch (error) {
+    throw new Error(`Invalid JSON Schema: ${error.message}`);
+  }
+  try {
+    parseAndValidateDefaults(parsedSchema);
+  } catch (error) {
+    throw new Error(`Invalid default values: ${error.message}`);
+  }
+
+  const addDefaults = (doc, parentSchema) => {
+    addDefaultsToObject(doc, parentSchema);
+
+    if (parentSchema.items) {
+      if (Array.isArray(doc)) {
+        addDefaultsToArray(doc, parentSchema);
       }
     }
   };
-  if (schema.required) {
-    const modifiedSchema = { ...schema };
-    for (const key in schema.properties) {
-      if (!schema.required.includes(key)) {
-        delete modifiedSchema.properties[key];
-      }
-    }
-    addDefaults(modifiedSchema, document);
-  } else {
-    addDefaults(schema, document);
+
+  try {
+    addDefaults(document, parsedSchema);
+  } catch (error) {
+    throw new Error(`Error adding default values: ${error.message}`);
   }
   return document;
 };

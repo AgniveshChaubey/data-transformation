@@ -6,7 +6,7 @@
             "properties": {
                 "name": {
                     "type": "string",
-                    "default": "John"
+                    "default": "Kai"
                 }
             }
         },
@@ -15,7 +15,7 @@
                 "description": "When the schema is applied to an empty object, the name property should be set to default value",
                 "instance": {},
                 "expected": {
-                    "name": "John"
+                    "name": "Kai"
                 }
             },
             {
@@ -52,7 +52,8 @@
                 "description": "When the schema is applied to an empty object, the properties which are present in the required list must set to default value",
                 "instance": {},
                 "expected": {
-                    "name": "Doe"
+                    "name": "Doe",
+                    "age": 33
                 }
             },
             {
