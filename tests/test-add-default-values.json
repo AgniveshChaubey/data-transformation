@@ -91,16 +91,80 @@
         ]
     },
     {
-        "description": "Handle invalid schema",
-        "schema": { "type": "invalid" },
+        "description": "Add defaults to tuple",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "numbers": {
+                    "type": "array",
+                    "items": [
+                        {
+                            "type": "number",
+                            "default": 39
+                        },
+                        {
+                            "type": "string",
+                            "default": "foo"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "default": "Logan"
+                                }
+                            }
+                        },
+                        {
+                            "type": "array",
+                            "items": [
+                                {
+                                    "type": "string",
+                                    "default": "Agnivesh"
+                                },
+                                {
+                                    "type": "number",
+                                    "default": 99999
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
         "tests": [
-          {
-            "description": "When the schema is invalid, an error should be thrown",
-            "instance": {},
-            "expected": "Invalid JSON Schema: Schema must be an object."
-          }
+            {
+                "description": "When the schema is applied to an object with a tuple, default values should be added to tuple items",
+                "instance": {},
+                "expected": {
+                    "numbers": [
+                        39,
+                        "foo",
+                        {
+                            "name": "Logan"
+                        },
+                        [
+                            "Agnivesh",
+                            99999
+                        ]
+                    ]
+                }
+            }
         ]
-      },
+    },
+    {
+        "description": "Handle invalid schema",
+        "schema": {
+            "type": "invalid"
+        },
+        "tests": [
+            {
+                "description": "When the schema is invalid, an error should be thrown",
+                "instance": {},
+                "expected": "Invalid JSON Schema: Schema must be an object."
+            }
+        ]
+    },
     {
         "description": "Given a schema with a default set for the required properties",
         "schema": {
