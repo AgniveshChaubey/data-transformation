@@ -105,6 +105,8 @@ export const addDefaultValuesToDocument = (schema, document) => {
   return document;
 };
 
+
+// FOR TESTING PURPOSE -This section will be removed later.
 // const schema = {
 //   type: "object",
 //   properties: {
