@@ -36,7 +36,7 @@ const addDefaultsToObject = (obj, schema) => {
         if (value.type === "object") {
           obj[key] = {};
           addDefaultsToObject(obj[key], value);
-        } else if (value.type === "array") {
+        } else if (value.type === "array" && Array.isArray(value.items)) {
           obj[key] = [];
           addDefaultsToArray(value.items, obj[key]);
         } else {
@@ -54,7 +54,7 @@ const addDefaultsToArray = (arr, resultantArr) => {
     } else if (arr[i].type === "object") {
       resultantArr[i] = {};
       addDefaultsToObject(resultantArr[i], arr[i]);
-    } else if (arr[i].type === "array") {
+    } else if (arr[i].type === "array" && Array.isArray(arr[i].items)) {
       resultantArr[i] = [];
       addDefaultsToArray(arr[i].items, resultantArr[i]);
     }
