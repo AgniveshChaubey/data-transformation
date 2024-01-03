@@ -1,11 +1,18 @@
 import Ajv from "ajv";
 const ajv = new Ajv();
 
-export const addDefaultValues = (schema, document) => {
+const parseAndValidateSchema = (schema) => {
+  if (typeof schema !== "object" || schema === null) {
+    throw new Error("Invalid Json Schema: Schema must be an object");
+  }
   const isValid = ajv.validate(schema, document);
   // eslint-disable-next-line no-console
   if (!isValid) console.warn(ajv.errors);
 
+  return schema;
+};
+
+export const addDefaultValues = (schema, document) => {
   const addDefaults = (schema, doc) => {
     if (typeof schema === "object" && !Array.isArray(schema)) {
       for (const key in schema.properties) {

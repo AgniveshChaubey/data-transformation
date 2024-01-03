@@ -5,6 +5,7 @@ export const removeExtraProperties = (schema, document) => {
   console.log(document);
   const isValid = ajv.validate(schema, document);
 
+  // eslint-disable-next-line no-console
   if (!isValid) console.warn(ajv.errors);
 
   const removeExtras = (schema, doc) => {
