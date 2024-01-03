@@ -26,6 +26,22 @@ const parseAndValidateDefaults = (schema) => {
   return defaults;
 };
 
+const addDefaultsToObjects = (obj, schema) => {
+  if (schema.properties) {
+    for (const key in schema.properties) {
+      const value = schema.properties[key];
+
+      if (obj[key] === undefined || obj[key] === null) {
+        obj[key] = value.default;
+      }
+
+      if (typeof value === "object" && !Array.isArray(value)) {
+        addDefaultsToObjects(obj[key], value);
+      }
+    }
+  }
+};
+
 export const addDefaultValues = (schema, document) => {
   const addDefaults = (schema, doc) => {
     if (typeof schema === "object" && !Array.isArray(schema)) {
