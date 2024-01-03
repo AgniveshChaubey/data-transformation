@@ -30,6 +30,39 @@
         ]
     },
     {
+        "description": "Add defaults to nested properties",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "person": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "default": "John"
+                        },
+                        "age": {
+                            "type": "number",
+                            "default": 25
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "When the schema is applied to an empty object, default values should be added to nested properties",
+                "instance": {},
+                "expected": {
+                    "person": {
+                        "name": "John",
+                        "age": 25
+                    }
+                }
+            }
+        ]
+    },
+    {
         "description": "Given a schema with a default set for the required properties only",
         "schema": {
             "type": "object",

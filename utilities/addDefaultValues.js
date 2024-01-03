@@ -32,11 +32,13 @@ const addDefaultsToObject = (obj, schema) => {
       const value = schema.properties[key];
 
       if (obj[key] === undefined || obj[key] === null) {
-        obj[key] = value.default;
-      }
-
-      if (typeof value === "object" && !Array.isArray(value)) {
-        addDefaultsToObject(obj[key], value);
+        // if (value.type === "object" && !Array.isArray(value)) {
+        if (value.type === "object") {
+          obj[key] = {};
+          addDefaultsToObject(obj[key], value);
+        } else {
+          obj[key] = value.default;
+        }
       }
     }
   }
@@ -45,7 +47,7 @@ const addDefaultsToObject = (obj, schema) => {
 const addDefaultsToArray = (arr, schema) => {
   if (schema.items && Array.isArray(arr)) {
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i] === undefined || arr[i] === null) {
+      if (schema.items.default !== undefined) {
         arr[i] = schema.items.default;
       }
 
@@ -86,3 +88,27 @@ export const addDefaultValuesToDocument = (schema, document) => {
   }
   return document;
 };
+
+const schema = {
+  type: "object",
+  properties: {
+    person: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          default: "John",
+        },
+        age: {
+          type: "number",
+          default: 25,
+        },
+      },
+    },
+  },
+};
+
+const document = {};
+
+const result = addDefaultValuesToDocument(schema, document);
+console.log(result);
