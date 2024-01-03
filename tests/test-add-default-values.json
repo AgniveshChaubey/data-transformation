@@ -91,7 +91,18 @@
         ]
     },
     {
-        "description": "Given a schema with a default set for the required properties only",
+        "description": "Handle invalid schema",
+        "schema": { "type": "invalid" },
+        "tests": [
+          {
+            "description": "When the schema is invalid, an error should be thrown",
+            "instance": {},
+            "expected": "Invalid JSON Schema: Schema must be an object."
+          }
+        ]
+      },
+    {
+        "description": "Given a schema with a default set for the required properties",
         "schema": {
             "type": "object",
             "properties": {

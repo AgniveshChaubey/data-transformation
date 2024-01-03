@@ -63,7 +63,7 @@ export const addDefaultValuesToDocument = (schema, document) => {
   try {
     parsedSchema = parseAndValidateSchema(schema, document);
   } catch (error) {
-    throw new Error(`Invalid JSON Schema: ${error.message}`);
+    return "Invalid JSON Schema: Schema must be an object.";
   }
   try {
     parseAndValidateDefaults(parsedSchema);
@@ -95,7 +95,7 @@ const schema = {
     numbers: {
       type: "array",
       items: { type: "number" },
-      default: "42"
+      default: "42",
     },
   },
 };
