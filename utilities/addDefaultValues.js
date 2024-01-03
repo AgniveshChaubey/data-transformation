@@ -12,6 +12,20 @@ const parseAndValidateSchema = (schema) => {
   return schema;
 };
 
+const parseAndValidateDefaults = (schema) => {
+  const defaults = {};
+  if (schema.properties) {
+    for (const key in schema.properties) {
+      const value = schema.properties[key];
+
+      if (value.default !== undefined) {
+        defaults[key] = value.default;
+      }
+    }
+  }
+  return defaults;
+};
+
 export const addDefaultValues = (schema, document) => {
   const addDefaults = (schema, doc) => {
     if (typeof schema === "object" && !Array.isArray(schema)) {
