@@ -26,7 +26,7 @@ const parseAndValidateDefaults = (schema) => {
   return defaults;
 };
 
-const addDefaultsToObjects = (obj, schema) => {
+const addDefaultsToObject = (obj, schema) => {
   if (schema.properties) {
     for (const key in schema.properties) {
       const value = schema.properties[key];
@@ -36,7 +36,21 @@ const addDefaultsToObjects = (obj, schema) => {
       }
 
       if (typeof value === "object" && !Array.isArray(value)) {
-        addDefaultsToObjects(obj[key], value);
+        addDefaultsToObject(obj[key], value);
+      }
+    }
+  }
+};
+
+const addDefaultsToArray = (arr, schema) => {
+  if (schema.items && Array.isArray(arr)) {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === undefined || arr[i] === null) {
+        arr[i] = schema.items.default;
+      }
+
+      if (typeof schema.items === "object" && !Array.isArray(schema.items)) {
+        addDefaultsToObject(arr[i], schema.items);
       }
     }
   }

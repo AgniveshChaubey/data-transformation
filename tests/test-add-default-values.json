@@ -36,7 +36,7 @@
             "properties": {
                 "name": {
                     "type": "string",
-                    "default": "John"
+                    "default": "Doe"
                 },
                 "age": {
                     "type": "number",
@@ -49,10 +49,10 @@
         },
         "tests": [
             {
-                "description": "When the schema is applied to an empty object, only the properties which are present in the required list should set to default value",
+                "description": "When the schema is applied to an empty object, the properties which are present in the required list must set to default value",
                 "instance": {},
                 "expected": {
-                    "name": "John"
+                    "name": "Doe"
                 }
             },
             {
@@ -61,7 +61,7 @@
                     "age": 90
                 },
                 "expected": {
-                    "name": "John",
+                    "name": "Doe",
                     "age": 90
                 }
             }
