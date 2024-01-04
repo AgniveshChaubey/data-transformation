@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+import { expect, test } from "vitest";
 import { convertFormQueryString } from "../utilities/convertFormQueryString";
 import testData from "./test-convert-form-query-string.json";
 

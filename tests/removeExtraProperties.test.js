@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+import { expect, test } from "vitest";
 import { removeExtraProperties } from "../utilities/removeExtraProperties.js";
 import testData from "./test-remove-extra-properties.json";
 
