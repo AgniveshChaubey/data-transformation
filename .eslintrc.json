@@ -22,7 +22,10 @@
     "no-useless-concat": "error",
     "no-useless-return": "error",
     "no-constant-condition": "warn",
-    "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|__" }],
+    "no-unused-vars": [
+      "warn",
+      { "argsIgnorePattern": "req|res|next|__", "varsIgnorePattern": "^_" }
+    ],
     //* Enhance Readability
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "no-mixed-spaces-and-tabs": "warn",
@@ -31,6 +34,7 @@
     "space-infix-ops": "error",
     "space-unary-ops": "error",
     "quotes": ["error", "double"],
+    "spaced-comment": ["warn", "always"],
     //
     "max-len": ["error", { "code": 200 }],
     "max-lines": ["error", { "max": 500 }],
@@ -52,6 +56,10 @@
     "no-var": "error",
     "object-shorthand": "off",
     "prefer-const": "error",
-    "prefer-template": "warn"
+    "prefer-template": "warn",
+    "no-warning-comments": [
+      "warn",
+      { "terms": ["todo", "fixme", "xxx"], "location": "start" }
+    ]
   }
 }

@@ -32,7 +32,7 @@ const addDefaultsToObject = (obj, schema) => {
       const value = schema.properties[key];
 
       if (obj[key] === undefined || obj[key] === null) {
-        //future debugging - if (value.type === "object" && !Array.isArray(value)) {
+        // future debugging - if (value.type === "object" && !Array.isArray(value)) {
         if (value.type === "object") {
           obj[key] = {};
           addDefaultsToObject(obj[key], value);

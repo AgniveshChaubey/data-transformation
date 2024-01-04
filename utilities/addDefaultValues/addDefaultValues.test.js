@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { addDefaultValuesToDocument } from "../utilities/addDefaultValues.js";
-import testData from "./test-add-default-values.json";
+import { addDefaultValuesToDocument } from "./addDefaultValues";
+import testData from "./tests.json";
 
 testData.forEach((testObj) => {
   testObj.tests.forEach((eachTest, index) => {
