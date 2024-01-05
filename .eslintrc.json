@@ -9,7 +9,6 @@
     "sourceType": "module"
   },
   "rules": {
-    "no-console": "warn",
     //* Avoid Bugs
     "no-undef": "error",
     "semi": "error",

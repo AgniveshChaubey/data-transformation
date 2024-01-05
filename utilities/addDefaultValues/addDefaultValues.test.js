@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { addDefaultValuesToDocument } from "./addDefaultValues";
+import { addDefaults } from "./addDefaultValues";
 import testData from "./tests.json";
 
 testData.forEach((testObj, i) => {
@@ -7,7 +7,7 @@ testData.forEach((testObj, i) => {
     test(`Running test ${i + 1}-${index + 1}: ${
       eachTest.description
     }`, async () => {
-      const result = await addDefaultValuesToDocument(
+      const result = await addDefaults(
         testObj.schema,
         eachTest.instance
       );
