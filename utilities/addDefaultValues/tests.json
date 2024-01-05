@@ -34,7 +34,7 @@
     {
         "description": "Add defaults to nested properties",
         "schema": {
-            "$id": "https://example.com/1",
+            "$id": "https://example.com/2",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
@@ -69,7 +69,7 @@
     {
         "description": "Add defaults to array",
         "schema": {
-            "$id": "https://example.com/1",
+            "$id": "https://example.com/3",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
@@ -99,13 +99,13 @@
     {
         "description": "Add defaults to tuple",
         "schema": {
-            "$id": "https://example.com/1",
+            "$id": "https://example.com/4",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "numbers": {
                     "type": "array",
-                    "items": [
+                    "prefixItems": [
                         {
                             "type": "number",
                             "default": 39
@@ -125,7 +125,7 @@
                         },
                         {
                             "type": "array",
-                            "items": [
+                            "prefixItems": [
                                 {
                                     "type": "string",
                                     "default": "Agnivesh"
@@ -163,7 +163,7 @@
     {
         "description": "Handle invalid schema",
         "schema": {
-            "$id": "https://example.com/1",
+            "$id": "https://example.com/5",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "invalid"
         },
@@ -171,14 +171,14 @@
             {
                 "description": "When the schema is invalid, an error should be thrown",
                 "instance": {},
-                "expected": "Invalid JSON Schema: Schema must be an object."
+                "expected": "Invalid Json Schema"
             }
         ]
     },
     {
         "description": "Given a schema with a default set for the required properties",
         "schema": {
-            "$id": "https://example.com/1",
+            "$id": "https://example.com/6",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {

@@ -4,40 +4,38 @@ import {
   validate,
 } from "@hyperjump/json-schema/draft-2020-12";
 
-const parseAndValidateSchema = (schema, document) => {
-  // if (typeof schema !== "object" || schema === null) {
-  //   throw new Error("Invalid Json Schema: Schema must be an object");
-  // }
-  // const isValid = ajv.validate(schema, document);
-  // // eslint-disable-next-line no-console
-  // if (!isValid) console.warn(ajv.errors);
-
+const parseAndValidateSchema = async (schema, document) => {
   try {
+    console.log("000000", schema);
     registerSchema(schema);
-    validate("https://example.com/1", document);
-    unregisterSchema("https://example.com/1");
-
+    const result = await validate(schema.$id, document);
+    console.log("1111111", result);
+    unregisterSchema(schema.$id);
     return schema;
   } catch (error) {
-    return "Invalid Schema";
+    // eslint-disable-next-line no-console
+    console.error({ cause: error });
+    return "Invalid Json Schema";
   }
 };
 
-const parseAndValidateDefaults = (schema) => {
-  const defaults = {};
-  if (schema.properties) {
-    for (const key in schema.properties) {
-      const value = schema.properties[key];
+// const parseAndValidateDefaults = (schema) => {
+//   const defaults = {};
+//   if (schema.properties) {
+//     for (const key in schema.properties) {
+//       const value = schema.properties[key];
 
-      if (value.default !== undefined) {
-        defaults[key] = value.default;
-      }
-    }
-  }
-  return defaults;
-};
+//       if (value.default !== undefined) {
+//         defaults[key] = value.default;
+//       }
+//     }
+//   }
+//   console.log("444444", defaults);
+//   return defaults;
+// };
 
-const addDefaultsToObject = (obj, schema) => {
+const addDefaultsToObject = (schema, obj) => {
+  console.log("55555", schema, obj);
   if (schema.properties) {
     for (const key in schema.properties) {
       const value = schema.properties[key];
@@ -46,12 +44,17 @@ const addDefaultsToObject = (obj, schema) => {
         // future debugging - if (value.type === "object" && !Array.isArray(value)) {
         if (value.type === "object") {
           obj[key] = {};
-          addDefaultsToObject(obj[key], value);
-        } else if (value.type === "array" && Array.isArray(value.items)) {
+          addDefaultsToObject(value, obj[key]);
+        } else if (value.type === "array") {
           obj[key] = [];
-          addDefaultsToArray(value.items, obj[key]);
+          if (Array.isArray(value.items)) {
+            addDefaultsToArray(value.items, obj[key]);
+          } else if (Array.isArray(value.prefixItems)) {
+            addDefaultsToArray(value.prefixItems, obj[key]);
+          }
         } else {
           obj[key] = value.default;
+          console.log("6666666", obj[key]);
         }
       }
     }
@@ -64,10 +67,14 @@ const addDefaultsToArray = (arr, resultantArr) => {
       resultantArr[i] = arr[i].default;
     } else if (arr[i].type === "object") {
       resultantArr[i] = {};
-      addDefaultsToObject(resultantArr[i], arr[i]);
-    } else if (arr[i].type === "array" && Array.isArray(arr[i].items)) {
+      addDefaultsToObject(arr[i], resultantArr[i]);
+    } else if (arr[i].type === "array") {
       resultantArr[i] = [];
-      addDefaultsToArray(arr[i].items, resultantArr[i]);
+      if (Array.isArray(arr[i].items)) {
+        addDefaultsToArray(arr[i].items, resultantArr[i]);
+      } else if (Array.isArray(arr[i].prefixItems)) {
+        addDefaultsToArray(arr[i].prefixItems, resultantArr[i]);
+      }
     }
   }
 };
@@ -87,50 +94,92 @@ const hasProperty = (obj, targetProperty) => {
   return false;
 };
 
-export const addDefaultValuesToDocument = (schema, document) => {
+export const addDefaultValuesToDocument = async (schema, document) => {
   let parsedSchema;
-  if (hasProperty(schema, "prefixItems")) {
-    parsedSchema = schema;
-  } else {
-    try {
-      parsedSchema = parseAndValidateSchema(schema, document);
-      console.log(parsedSchema)
-    } catch (error) {
-      return "Invalid JSON Schema: Schema must be an object.";
-    }
-    try {
-      parseAndValidateDefaults(parsedSchema);
-    } catch (error) {
-      throw new Error(`Invalid default values: ${error.message}`);
-    }
-  }
-
-  const addDefaults = (doc, parentSchema) => {
-    addDefaultsToObject(doc, parentSchema);
-  };
 
   try {
-    addDefaults(document, parsedSchema);
+    parsedSchema = await parseAndValidateSchema(schema, document);
+    console.log("333333", parsedSchema);
   } catch (error) {
-    throw new Error(`Error adding default values: ${error.message}`);
+    parsedSchema = "Invalid Json Schema";
+  }
+
+  if (parsedSchema === "Invalid Json Schema") {
+    return "Invalid Json Schema";
+  }
+  // else {
+  //   try {
+  //     parseAndValidateDefaults(parsedSchema);
+  //   } catch (error) {
+  //     throw new Error(`Invalid default values: ${error.message}`);
+  //   }
+  // }
+
+  try {
+    addDefaultsToObject(parsedSchema, document);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error({ cause: error });
+    return "Invalid Json Schema";
   }
   return document;
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-// const schema = {
-//   type: "object",
-//   properties: {
-//     numbers: {
-//       type: "array",
-//       items: {
-//         type: "number",
-//       },
-//       default: [40],
-//     },
-//   },
-// };
-// const document = {};
+// const schema = "";
+const schema = {
+  $id: "https://example.com/4",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  properties: {
+    numbers: {
+      type: "array",
+      prefixItems: [
+        {
+          type: "number",
+          default: 39,
+        },
+        {
+          type: "string",
+          default: "foo",
+        },
+        {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              default: "Logan",
+            },
+          },
+        },
+        {
+          type: "array",
+          prefixItems: [
+            {
+              type: "string",
+              default: "Agnivesh",
+            },
+            {
+              type: "number",
+              default: 99999,
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
 
-// const result = addDefaultValuesToDocument(schema, document);
-// console.log(result);
+const document = {
+  // numbers: [
+  //   23,
+  //   "foo",
+  //   {
+  //     name: "Agni",
+  //   },
+  //   ["Chaubey", 27],
+  // ],
+};
+
+const result = await addDefaultValuesToDocument(schema, document);
+console.log(result);
