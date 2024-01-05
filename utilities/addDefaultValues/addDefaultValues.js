@@ -1,15 +1,26 @@
-import Ajv from "ajv";
-const ajv = new Ajv();
+import {
+  registerSchema,
+  unregisterSchema,
+  validate,
+} from "@hyperjump/json-schema/draft-2020-12";
 
 const parseAndValidateSchema = (schema, document) => {
-  if (typeof schema !== "object" || schema === null) {
-    throw new Error("Invalid Json Schema: Schema must be an object");
-  }
-  const isValid = ajv.validate(schema, document);
-  // eslint-disable-next-line no-console
-  if (!isValid) console.warn(ajv.errors);
+  // if (typeof schema !== "object" || schema === null) {
+  //   throw new Error("Invalid Json Schema: Schema must be an object");
+  // }
+  // const isValid = ajv.validate(schema, document);
+  // // eslint-disable-next-line no-console
+  // if (!isValid) console.warn(ajv.errors);
 
-  return schema;
+  try {
+    registerSchema(schema);
+    validate("https://example.com/1", document);
+    unregisterSchema("https://example.com/1");
+
+    return schema;
+  } catch (error) {
+    return "Invalid Schema";
+  }
 };
 
 const parseAndValidateDefaults = (schema) => {
@@ -83,6 +94,7 @@ export const addDefaultValuesToDocument = (schema, document) => {
   } else {
     try {
       parsedSchema = parseAndValidateSchema(schema, document);
+      console.log(parsedSchema)
     } catch (error) {
       return "Invalid JSON Schema: Schema must be an object.";
     }
@@ -104,7 +116,6 @@ export const addDefaultValuesToDocument = (schema, document) => {
   }
   return document;
 };
-
 
 // FOR TESTING PURPOSE -This section will be removed later.
 // const schema = {

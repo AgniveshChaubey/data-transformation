@@ -13,6 +13,7 @@
   "author": "AgniveshChaubey",
   "license": "MIT",
   "dependencies": {
+    "@hyperjump/json-schema": "^1.7.0",
     "ajv": "^8.12.0"
   },
   "devDependencies": {

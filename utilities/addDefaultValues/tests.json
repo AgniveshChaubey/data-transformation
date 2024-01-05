@@ -2,6 +2,8 @@
     {
         "description": "Given a schema with a default set for the 'name' property",
         "schema": {
+            "$id": "https://example.com/1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "name": {
@@ -32,6 +34,8 @@
     {
         "description": "Add defaults to nested properties",
         "schema": {
+            "$id": "https://example.com/1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "person": {
@@ -65,6 +69,8 @@
     {
         "description": "Add defaults to array",
         "schema": {
+            "$id": "https://example.com/1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "numbers": {
@@ -93,6 +99,8 @@
     {
         "description": "Add defaults to tuple",
         "schema": {
+            "$id": "https://example.com/1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "numbers": {
@@ -155,6 +163,8 @@
     {
         "description": "Handle invalid schema",
         "schema": {
+            "$id": "https://example.com/1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "invalid"
         },
         "tests": [
@@ -168,6 +178,8 @@
     {
         "description": "Given a schema with a default set for the required properties",
         "schema": {
+            "$id": "https://example.com/1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "name": {
