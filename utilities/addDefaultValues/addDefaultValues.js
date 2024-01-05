@@ -46,11 +46,15 @@ const addDefaultsToObject = (schema, obj) => {
           obj[key] = {};
           addDefaultsToObject(value, obj[key]);
         } else if (value.type === "array") {
-          obj[key] = [];
-          if (Array.isArray(value.items)) {
-            addDefaultsToArray(value.items, obj[key]);
-          } else if (Array.isArray(value.prefixItems)) {
-            addDefaultsToArray(value.prefixItems, obj[key]);
+          if (value.default) {
+            obj[key] = value.default;
+          } else {
+            obj[key] = [];
+            if (Array.isArray(value.items)) {
+              addDefaultsToArray(value.items, obj[key]);
+            } else if (Array.isArray(value.prefixItems)) {
+              addDefaultsToArray(value.prefixItems, obj[key]);
+            }
           }
         } else {
           obj[key] = value.default;
