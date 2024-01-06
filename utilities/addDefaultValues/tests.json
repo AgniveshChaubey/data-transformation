@@ -215,5 +215,88 @@
                 }
             }
         ]
+    },
+    {
+        "description": "Hierarchical ambiguous defaults",
+        "schema": {
+            "$id": "https://example.com/7",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "foo": {
+                    "$ref": "#/$defs/foo",
+                    "default": true
+                }
+            },
+            "$defs": {
+                "foo": {
+                    "default": 42
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "given an empty object, the property is added",
+                "instance": {},
+                "expected": {
+                    "foo": true
+                }
+            }
+        ]
+    },
+    {
+        "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
+        "schema": {
+            "$id": "https://example.com/8",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "foo": {
+                    "default": true,
+                    "$ref": "#/$defs/foo"
+                }
+            },
+            "$defs": {
+                "foo": {
+                    "default": 42
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "given an empty object, the property is added",
+                "instance": {},
+                "expected": {
+                    "foo": true
+                }
+            }
+        ]
+    },
+    {
+        "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
+        "schema": {
+            "$id": "https://example.com/8",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "foo": {
+                    "$ref": "#/$defs/foo"
+                }
+            },
+            "$defs": {
+                "foo": {
+                    "default": 42
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "given an empty object, the property is added",
+                "instance": {},
+                "expected": {
+                    "foo": 42
+                }
+            }
+        ]
     }
 ]

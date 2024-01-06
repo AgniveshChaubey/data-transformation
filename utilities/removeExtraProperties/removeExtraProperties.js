@@ -2,7 +2,7 @@ import Ajv from "ajv";
 const ajv = new Ajv();
 
 export const removeExtraProperties = (schema, document) => {
-  console.log(document);
+  // console.log(document);
   const isValid = ajv.validate(schema, document);
 
   // eslint-disable-next-line no-console
@@ -26,7 +26,7 @@ export const removeExtraProperties = (schema, document) => {
   };
 
   removeExtras(schema, document);
-  console.log(document);
+  // console.log(document);
 
   return document;
 };

@@ -21,7 +21,7 @@ export const addDefaults = async (schema, document) => {
     addDefaultsToObject(parsedSchema, document);
   } catch (error) {
     console.error("Error adding default values", { cause: error });
-    return "Invalid Json Schema";
+    return "Error adding default values";
   }
   return document;
 };
@@ -44,7 +44,14 @@ const addDefaultsToObject = (schema, obj) => {
       const propertyValue = schema.properties[propertyName];
 
       if (obj[propertyName] === undefined || obj[propertyName] === null) {
-        if (propertyValue.type === "object") {
+        if (propertyValue.default) {
+          obj[propertyName] = propertyValue.default;
+        } else if (propertyValue.$ref) {
+          obj[propertyName] = addDefaultsToObject(
+            resolveRef(propertyValue.$ref, schema),
+            obj
+          );
+        } else if (propertyValue.type === "object") {
           obj[propertyName] = {};
           addDefaultsToObject(propertyValue, obj[propertyName]);
         } else if (propertyValue.type === "array") {
@@ -58,11 +65,11 @@ const addDefaultsToObject = (schema, obj) => {
               addDefaultsToArray(propertyValue.prefixItems, obj[propertyName]);
             }
           }
-        } else {
-          obj[propertyName] = propertyValue.default;
         }
       }
     }
+  } else {
+    return schema.default;
   }
 };
 
@@ -84,17 +91,34 @@ const addDefaultsToArray = (itemsArr, resultantArr) => {
   }
 };
 
+const resolveRef = (ref, schema) => {
+  const parts = ref.split("/");
+  let node = schema;
+
+  for (let i = 1; i < parts.length; i++) {
+    node = node[parts[i]];
+  }
+
+  return node;
+};
+
 // FOR TESTING PURPOSE -This section will be removed later.
 // const schema = {
 //   $id: "https://example.com/4",
 //   $schema: "https://json-schema.org/draft/2020-12/schema",
 //   type: "object",
 //   properties: {
-//     name: {type:"string", default : 22}
-//   }
+//     foo: {
+//       $ref: "#/$defs/foo",
+//       // default: true,
+//     },
+//   },
+//   $defs: {
+//     foo: { default: 42 },
+//   },
 // };
 
 // const document = {};
 
-// const result = await addDefaultValuesToDocument(schema, document);
+// const result = await addDefaults(schema, document);
 // console.log(result);
