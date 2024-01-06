@@ -16,14 +16,14 @@ export const addDefaults = async (schema, document) => {
   if (parsedSchema === "Invalid Json Schema") {
     return "Invalid Json Schema";
   }
-
+  let updatedDocument;
   try {
-    addDefaultsToObject(parsedSchema, document);
+    updatedDocument = addDefaultsToObject(parsedSchema, document);
   } catch (error) {
     console.error("Error adding default values", { cause: error });
     return "Error adding default values";
   }
-  return document;
+  return updatedDocument;
 };
 
 const parseAndValidateSchema = async (schema, document) => {
@@ -68,9 +68,14 @@ const addDefaultsToObject = (schema, obj) => {
         }
       }
     }
+  } else if (schema.allof) {
+    for (let i = 0; i < schema.allof.length; i++) {
+      addDefaultsToObject(schema.allof[i], obj);
+    }
   } else {
     return schema.default;
   }
+  return obj;
 };
 
 const addDefaultsToArray = (itemsArr, resultantArr) => {
@@ -106,19 +111,10 @@ const resolveRef = (ref, schema) => {
 // const schema = {
 //   $id: "https://example.com/4",
 //   $schema: "https://json-schema.org/draft/2020-12/schema",
-//   type: "object",
-//   properties: {
-//     foo: {
-//       $ref: "#/$defs/foo",
-//       // default: true,
-//     },
-//   },
-//   $defs: {
-//     foo: { default: 42 },
-//   },
+//   // allOf: [{ default: 42 }, { default: "foo" }],
 // };
 
-// const document = {};
+// const document = null;
 
 // const result = await addDefaults(schema, document);
 // console.log(result);
