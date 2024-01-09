@@ -39,7 +39,7 @@ const parseAndValidateSchema = async (schema, document) => {
 };
 
 const addDefaultsToObject = (schema, obj) => {
-  if (schema.properties) {
+  if (schema.type === "object" || schema.properties) {
     for (const propertyName in schema.properties) {
       const propertyValue = schema.properties[propertyName];
 
@@ -68,32 +68,35 @@ const addDefaultsToObject = (schema, obj) => {
         }
       }
     }
-  } else if (schema.prefixItems) {
+  } else if (schema.type === "array" || schema.prefixItems) {
     return addDefaultsToArray(schema.prefixItems, obj);
+  } else if (schema.type === "array" || schema.items) {
+    return addDefaultsToArray(schema.items, obj);
   } else {
     return schema.default;
   }
   return obj;
 };
-
 const addDefaultsToArray = (itemsArr, resultantArr) => {
   for (let i = 0; i < itemsArr.length; i++) {
-    if (itemsArr[i].type === undefined) {
-      if (resultantArr[i] === undefined) {
+    if (resultantArr[i] === undefined || resultantArr[i] === null) {
+      if (itemsArr[i].default) {
         resultantArr[i] = itemsArr[i].default;
-      }
+      } else return resultantArr;
     } else if (itemsArr[i].type === "object") {
       resultantArr[i] = {};
       addDefaultsToObject(itemsArr[i], resultantArr[i]);
-    } else if (itemsArr[i].type === "array") {
-      resultantArr[i] = [];
+    } else if (
+      itemsArr[i].type === "array" ||
+      itemsArr[i].items ||
+      itemsArr[i].prefixItems
+    ) {
+      resultantArr[i] ??= [];
       if (Array.isArray(itemsArr[i].items)) {
         addDefaultsToArray(itemsArr[i].items, resultantArr[i]);
       } else if (Array.isArray(itemsArr[i].prefixItems)) {
         addDefaultsToArray(itemsArr[i].prefixItems, resultantArr[i]);
       }
-    } else {
-      resultantArr[i] = itemsArr[i].default;
     }
   }
   return resultantArr;
@@ -111,18 +114,18 @@ const resolveRef = (ref, schema) => {
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-const schema = {
-  $id: "https://example.com/4",
-  $schema: "https://json-schema.org/draft/2020-12/schema",
-  type: "array",
-  prefixItems: [
-    {
-      default: 42,
-    },
-  ],
-};
+// const schema = {
+//   $id: "https://example.com/4",
+//   $schema: "https://json-schema.org/draft/2020-12/schema",
+//   type: "array",
+//   prefixItems: [
+//     {
+//       default: 42,
+//     },
+//   ],
+// };
 
-const document = ["bar"];
+// const document = ["bar"];
 
-const result = await addDefaults(schema, document);
-console.log(result);
+// const result = await addDefaults(schema, document);
+// console.log(result);

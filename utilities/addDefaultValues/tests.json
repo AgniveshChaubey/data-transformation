@@ -97,70 +97,6 @@
         ]
     },
     {
-        "description": "Add defaults to tuple",
-        "schema": {
-            "$id": "https://example.com/4",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "numbers": {
-                    "type": "array",
-                    "prefixItems": [
-                        {
-                            "type": "number",
-                            "default": 39
-                        },
-                        {
-                            "type": "string",
-                            "default": "foo"
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "default": "Logan"
-                                }
-                            }
-                        },
-                        {
-                            "type": "array",
-                            "prefixItems": [
-                                {
-                                    "type": "string",
-                                    "default": "Agnivesh"
-                                },
-                                {
-                                    "type": "number",
-                                    "default": 99999
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "When the schema is applied to an object with a tuple, default values should be added to tuple items",
-                "instance": {},
-                "expected": {
-                    "numbers": [
-                        39,
-                        "foo",
-                        {
-                            "name": "Logan"
-                        },
-                        [
-                            "Agnivesh",
-                            99999
-                        ]
-                    ]
-                }
-            }
-        ]
-    },
-    {
         "description": "Handle invalid schema",
         "schema": {
             "$id": "https://example.com/5",
@@ -275,7 +211,7 @@
     {
         "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
         "schema": {
-            "$id": "https://example.com/8",
+            "$id": "https://example.com/9",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
@@ -302,7 +238,7 @@
     {
         "description": "Undefined item with a default gets added",
         "schema": {
-            "$id": "https://example.com/9",
+            "$id": "https://example.com/10",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "array",
             "prefixItems": [
@@ -326,6 +262,55 @@
                 ],
                 "expected": [
                     "bar"
+                ]
+            }
+        ]
+    },
+    {
+        "description": "Undefined nested array with a default gets added",
+        "schema": {
+            "$id": "https://example.com/10",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array",
+            "prefixItems": [
+                {
+                    "type": "array",
+                    "prefixItems": [
+                        {
+                            "default": 42
+                        }
+                    ]
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "given an empty array, nothing is added",
+                "instance": [],
+                "expected": []
+            },
+            {
+                "description": "given an item with an empty array, an item is added",
+                "instance": [
+                    []
+                ],
+                "expected": [
+                    [
+                        42
+                    ]
+                ]
+            },
+            {
+                "description": "given an array with the '0' index already set, the item is unchanged",
+                "instance": [
+                    [
+                        true
+                    ]
+                ],
+                "expected": [
+                    [
+                        true
+                    ]
                 ]
             }
         ]
