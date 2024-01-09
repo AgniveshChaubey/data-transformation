@@ -298,5 +298,36 @@
                 }
             }
         ]
+    },
+    {
+        "description": "Undefined item with a default gets added",
+        "schema": {
+            "$id": "https://example.com/9",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array",
+            "prefixItems": [
+                {
+                    "default": 42
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "given an empty array, the item is added",
+                "instance": [],
+                "expected": [
+                    42
+                ]
+            },
+            {
+                "description": "given an array with the item already set, the item is unchanged",
+                "instance": [
+                    "bar"
+                ],
+                "expected": [
+                    "bar"
+                ]
+            }
+        ]
     }
 ]

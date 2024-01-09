@@ -68,10 +68,8 @@ const addDefaultsToObject = (schema, obj) => {
         }
       }
     }
-  } else if (schema.allof) {
-    for (let i = 0; i < schema.allof.length; i++) {
-      addDefaultsToObject(schema.allof[i], obj);
-    }
+  } else if (schema.prefixItems) {
+    return addDefaultsToArray(schema.prefixItems, obj);
   } else {
     return schema.default;
   }
@@ -80,8 +78,10 @@ const addDefaultsToObject = (schema, obj) => {
 
 const addDefaultsToArray = (itemsArr, resultantArr) => {
   for (let i = 0; i < itemsArr.length; i++) {
-    if (itemsArr[i].type !== "object" && itemsArr[i].type !== "array") {
-      resultantArr[i] = itemsArr[i].default;
+    if (itemsArr[i].type === undefined) {
+      if (resultantArr[i] === undefined) {
+        resultantArr[i] = itemsArr[i].default;
+      }
     } else if (itemsArr[i].type === "object") {
       resultantArr[i] = {};
       addDefaultsToObject(itemsArr[i], resultantArr[i]);
@@ -92,8 +92,11 @@ const addDefaultsToArray = (itemsArr, resultantArr) => {
       } else if (Array.isArray(itemsArr[i].prefixItems)) {
         addDefaultsToArray(itemsArr[i].prefixItems, resultantArr[i]);
       }
+    } else {
+      resultantArr[i] = itemsArr[i].default;
     }
   }
+  return resultantArr;
 };
 
 const resolveRef = (ref, schema) => {
@@ -108,13 +111,18 @@ const resolveRef = (ref, schema) => {
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-// const schema = {
-//   $id: "https://example.com/4",
-//   $schema: "https://json-schema.org/draft/2020-12/schema",
-//   // allOf: [{ default: 42 }, { default: "foo" }],
-// };
+const schema = {
+  $id: "https://example.com/4",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "array",
+  prefixItems: [
+    {
+      default: 42,
+    },
+  ],
+};
 
-// const document = null;
+const document = ["bar"];
 
-// const result = await addDefaults(schema, document);
-// console.log(result);
+const result = await addDefaults(schema, document);
+console.log(result);
