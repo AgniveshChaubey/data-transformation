@@ -126,10 +126,7 @@
                     "type": "number",
                     "default": 33
                 }
-            },
-            "required": [
-                "name"
-            ]
+            }
         },
         "tests": [
             {
@@ -311,6 +308,50 @@
                     [
                         true
                     ]
+                ]
+            }
+        ]
+    },
+    {
+        "description": "Add defaults to array items",
+        "schema": {
+            "$id": "https://example.com/11",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array",
+            "prefixItems": [
+                true
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "foo": {
+                        "default": 42
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "Any items without 'foo' should have the default filled in",
+                "instance": [
+                    {},
+                    {},
+                    {
+                        "foo": true
+                    },
+                    {}
+                ],
+                "expected": [
+                    {},
+                    {
+                        "foo": 42
+                    },
+                    {
+                        "foo": true
+                    },
+                    {
+                        "foo": 42
+                    }
                 ]
             }
         ]
