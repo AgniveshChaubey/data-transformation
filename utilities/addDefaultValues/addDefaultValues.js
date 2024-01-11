@@ -59,43 +59,39 @@ const addDefaultsToObject = (schema, obj) => {
             obj[propertyName] = propertyValue.default;
           } else {
             obj[propertyName] = [];
-            if (Array.isArray(propertyValue.items)) {
-              addDefaultsToArray(propertyValue.items, obj[propertyName]);
-            } else if (Array.isArray(propertyValue.prefixItems)) {
-              addDefaultsToArray(propertyValue.prefixItems, obj[propertyName]);
+            if (Array.isArray(propertyValue.prefixItems)) {
+              addDefaultsToArray(propertyValue, obj[propertyName]);
             }
           }
         }
       }
     }
   } else if (schema.type === "array" || schema.prefixItems) {
-    return addDefaultsToArray(schema.prefixItems, obj);
-  } else if (schema.type === "array" || schema.items) {
-    return addDefaultsToArray(schema.items, obj);
+    return addDefaultsToArray(schema, obj);
   } else {
     return schema.default;
   }
   return obj;
 };
-const addDefaultsToArray = (itemsArr, resultantArr) => {
-  for (let i = 0; i < itemsArr.length; i++) {
+const addDefaultsToArray = (schema, resultantArr) => {
+  const prefixItemsArr = schema.prefixItems;
+
+  for (let i = 0; i < prefixItemsArr.length; i++) {
     if (resultantArr[i] === undefined || resultantArr[i] === null) {
-      if (itemsArr[i].default) {
-        resultantArr[i] = itemsArr[i].default;
+      if (prefixItemsArr[i].default) {
+        resultantArr[i] = prefixItemsArr[i].default;
       } else return resultantArr;
-    } else if (itemsArr[i].type === "object") {
+    } else if (prefixItemsArr[i].type === "object") {
       resultantArr[i] = {};
-      addDefaultsToObject(itemsArr[i], resultantArr[i]);
+      addDefaultsToObject(prefixItemsArr[i], resultantArr[i]);
     } else if (
-      itemsArr[i].type === "array" ||
-      itemsArr[i].items ||
-      itemsArr[i].prefixItems
+      prefixItemsArr[i].type === "array" ||
+      prefixItemsArr[i].items ||
+      prefixItemsArr[i].prefixItems
     ) {
       resultantArr[i] ??= [];
-      if (Array.isArray(itemsArr[i].items)) {
-        addDefaultsToArray(itemsArr[i].items, resultantArr[i]);
-      } else if (Array.isArray(itemsArr[i].prefixItems)) {
-        addDefaultsToArray(itemsArr[i].prefixItems, resultantArr[i]);
+      if (Array.isArray(prefixItemsArr[i].prefixItems)) {
+        addDefaultsToArray(prefixItemsArr[i], resultantArr[i]);
       }
     }
   }
@@ -114,18 +110,20 @@ const resolveRef = (ref, schema) => {
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-// const schema = {
-//   $id: "https://example.com/4",
-//   $schema: "https://json-schema.org/draft/2020-12/schema",
-//   type: "array",
-//   prefixItems: [
-//     {
-//       default: 42,
-//     },
-//   ],
-// };
+const schema = {
+  $id: "https://example.com/4",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "array",
+  prefixItems: [true],
+  items: {
+    type: "object",
+    properties: {
+      foo: { default: 42 },
+    },
+  },
+};
 
-// const document = ["bar"];
+const document = [{}, {}, { foo: true }, {}];
 
-// const result = await addDefaults(schema, document);
-// console.log(result);
+const result = await addDefaults(schema, document);
+console.log(result);
