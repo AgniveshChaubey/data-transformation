@@ -355,5 +355,47 @@
                 ]
             }
         ]
+    },
+    {
+        "description": "Add defaults to array additional properties",
+        "schema": {
+            "$id": "https://example.com/12",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "prefixItems": [
+                    {
+                        "default": 42
+                    }
+                ]
+            }
+        },
+        "tests": [
+            {
+                "description": "it should fill in the defaults in an additional property",
+                "instance": {
+                    "aaa": []
+                },
+                "expected": {
+                    "aaa": [
+                        42
+                    ]
+                }
+            },
+            {
+                "description": "it should not apply the default in an additional property if the value is already present",
+                "instance": {
+                    "foo": [
+                        24
+                    ]
+                },
+                "expected": {
+                    "foo": [
+                        24
+                    ]
+                }
+            }
+        ]
     }
 ]

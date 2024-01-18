@@ -42,32 +42,16 @@ const parseAndValidateSchema = async (schema, document) => {
 };
 
 const addDefaultsToObject = (schema, obj) => {
-  if (schema.type === "object" || schema.properties) {
-    for (const propertyName in schema.properties) {
-      const propertyValue = schema.properties[propertyName];
-
-      if (obj[propertyName] === undefined || obj[propertyName] === null) {
-        if (propertyValue.default) {
-          obj[propertyName] = propertyValue.default;
-        } else if (propertyValue.$ref) {
-          obj[propertyName] = addDefaultsToObject(
-            resolveRef(propertyValue.$ref, schema),
-            obj
-          );
-        } else if (propertyValue.type === "object") {
-          obj[propertyName] = {};
-          addDefaultsToObject(propertyValue, obj[propertyName]);
-        } else if (propertyValue.type === "array") {
-          if (propertyValue.default) {
-            obj[propertyName] = propertyValue.default;
-          } else {
-            obj[propertyName] = [];
-            if (Array.isArray(propertyValue.prefixItems)) {
-              addDefaultsToArray(propertyValue, obj[propertyName]);
-            }
-          }
-        }
-      }
+  if (
+    schema.type === "object" ||
+    schema.properties ||
+    schema.additionalProperties
+  ) {
+    if (schema.properties) {
+      addDefaultsToProperties(schema, schema.properties, obj);
+    }
+    if (schema.additionalProperties) {
+      addDefaultsToAdditionalProperties(schema.additionalProperties, obj);
     }
   } else if (schema.type === "array" || schema.prefixItems || schema.items) {
     return addDefaultsToArray(schema, obj);
@@ -75,6 +59,57 @@ const addDefaultsToObject = (schema, obj) => {
     return schema.default;
   }
   return obj;
+};
+
+const addDefaultsToProperties = (schema, properties, obj) => {
+  for (const propertyName in properties) {
+    const propertyValue = properties[propertyName];
+    if (obj[propertyName] === undefined || obj[propertyName] === null) {
+      if (propertyValue.default) {
+        obj[propertyName] = propertyValue.default;
+      } else if (propertyValue.$ref) {
+        obj[propertyName] = addDefaultsToObject(
+          resolveRef(propertyValue.$ref, schema),
+          obj
+        );
+      } else if (propertyValue.type === "object") {
+        obj[propertyName] = {};
+        addDefaultsToObject(propertyValue, obj[propertyName]);
+      } else if (propertyValue.type === "array") {
+        if (propertyValue.default) {
+          obj[propertyName] = propertyValue.default;
+        } else {
+          obj[propertyName] = [];
+          if (Array.isArray(propertyValue.prefixItems)) {
+            addDefaultsToArray(propertyValue, obj[propertyName]);
+          }
+        }
+      }
+    }
+  }
+  return obj;
+};
+
+const addDefaultsToAdditionalProperties = (additionalProps, obj) => {
+  for (const property in obj) {
+    addDefaultsToObject(additionalProps, obj[property]);
+  }
+};
+
+const addDefaultsToArray = (schema, arr) => {
+  let resultantArr = arr;
+  if (schema.prefixItems) {
+    resultantArr = addPrefixDefaults(schema.prefixItems, arr);
+  }
+
+  if (schema.items) {
+    const prefixArrLength = schema.prefixItems ? schema.prefixItems.length : 0;
+    for (let i = prefixArrLength; i < arr.length; i++) {
+      addDefaultsToObject(schema.items, arr[i]);
+    }
+  }
+
+  return resultantArr;
 };
 
 const addPrefixDefaults = (prefixItemsArr, instanceArr) => {
@@ -94,29 +129,12 @@ const addPrefixDefaults = (prefixItemsArr, instanceArr) => {
       prefixItemsArr[i].prefixItems ||
       prefixItemsArr[i].items
     ) {
-      // instanceArr[i] ??= [];
       addDefaultsToArray(prefixItemsArr[i], instanceArr[i]);
     } else {
       addDefaultsToObject(prefixItemsArr[i], instanceArr);
     }
   }
   return instanceArr;
-};
-
-const addDefaultsToArray = (schema, arr) => {
-  let resultantArr = arr;
-  if (schema.prefixItems) {
-    resultantArr = addPrefixDefaults(schema.prefixItems, arr);
-  }
-
-  if (schema.items) {
-    const prefixArrLength = schema.prefixItems ? schema.prefixItems.length : 0;
-    for (let i = prefixArrLength; i < arr.length; i++) {
-      addDefaultsToObject(schema.items, arr[i]);
-    }
-  }
-
-  return resultantArr;
 };
 
 const resolveRef = (ref, schema) => {
@@ -134,19 +152,13 @@ const resolveRef = (ref, schema) => {
 const schema = {
   $id: "https://example.com/4",
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  type: "array",
-  prefixItems: [{ type: "string", default: "Agni" }],
-  // prefixItems: [true],
-  // items: {
-  //   type: "object",
-  //   properties: {
-  //     foo: { default: 42 },
-  //   },
-  // },
+  type: "object",
+  additionalProperties: {
+    type: "array",
+    prefixItems: [{ default: 42 }, { default: 100 }],
+  },
 };
 
-const document = [{}, {}, { foo: true }, {}];
-
+const document = { aaa: [] };
 const result = await addDefaults(schema, document);
-// // console.log(schema);
 console.log(result);
