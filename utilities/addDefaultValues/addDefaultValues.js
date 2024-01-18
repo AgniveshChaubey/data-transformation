@@ -3,6 +3,7 @@ import {
   unregisterSchema,
   validate,
 } from "@hyperjump/json-schema/draft-2020-12";
+import { dataType } from "../helpers.js";
 
 export const addDefaults = async (schema, document) => {
   let parsedSchema;
@@ -99,7 +100,7 @@ const addDefaultsToAdditionalProperties = (additionalProps, obj) => {
 const addDefaultsToArray = (schema, arr) => {
   let resultantArr = arr;
   if (schema.prefixItems) {
-    resultantArr = addPrefixDefaults(schema.prefixItems, arr);
+    resultantArr = addDefaultsToPrefixItems(schema.prefixItems, arr);
   }
 
   if (schema.items) {
@@ -109,10 +110,30 @@ const addDefaultsToArray = (schema, arr) => {
     }
   }
 
+  if (schema.contains) {
+    addDefaultsToContains(schema.contains, arr);
+  }
+
   return resultantArr;
 };
 
-const addPrefixDefaults = (prefixItemsArr, instanceArr) => {
+const addDefaultsToContains = (schema, instanceArr) => {
+  const datatype = dataType(schema);
+  for (let i = 0; i < instanceArr.length - 1; i++) {
+    // eslint-disable-next-line no-constant-condition
+    if (typeof (instanceArr[i] === datatype)) {
+      const allElementsPresent = schema.required.every((element) =>
+        // eslint-disable-next-line no-prototype-builtins
+        instanceArr[i].hasOwnProperty(element)
+      );
+      if (allElementsPresent) {
+        addDefaultsToObject(schema, instanceArr[i]);
+      }
+    }
+  }
+};
+
+const addDefaultsToPrefixItems = (prefixItemsArr, instanceArr) => {
   for (let i = 0; i < prefixItemsArr.length; i++) {
     if (instanceArr[i] === undefined || instanceArr[i] === null) {
       if (prefixItemsArr[i].default) {
@@ -152,13 +173,17 @@ const resolveRef = (ref, schema) => {
 const schema = {
   $id: "https://example.com/4",
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  type: "object",
-  additionalProperties: {
-    type: "array",
-    prefixItems: [{ default: 42 }, { default: 100 }],
+  type: "array",
+  contains: {
+    type: "object",
+    properties: {
+      foo: { const: 42 },
+      bar: { default: 24 },
+    },
+    required: ["foo"],
   },
 };
 
-const document = { aaa: [] };
+const document = [{}, { foo: true }, {}];
 const result = await addDefaults(schema, document);
 console.log(result);

@@ -397,5 +397,47 @@
                 }
             }
         ]
+    },
+    {
+        "description": "Add defaults to array with contains",
+        "schema": {
+            "$id": "https://example.com/13",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array",
+            "contains": {
+                "type": "object",
+                "properties": {
+                    "foo": {
+                        "const": 42
+                    },
+                    "bar": {
+                        "default": 24
+                    }
+                },
+                "required": [
+                    "foo"
+                ]
+            }
+        },
+        "tests": [
+            {
+                "description": "it should apply the default to any item where the item matches 'contains'",
+                "instance": [
+                    {},
+                    {
+                        "foo": 42
+                    },
+                    {}
+                ],
+                "expected": [
+                    {},
+                    {
+                        "foo": 42,
+                        "bar": 24
+                    },
+                    {}
+                ]
+            }
+        ]
     }
 ]
