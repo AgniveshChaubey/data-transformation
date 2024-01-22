@@ -439,5 +439,27 @@
                 ]
             }
         ]
+    },
+    {
+        "description": "Non-hierarchical ambiguous defaults with anyOf",
+        "schema": {
+            "$id": "https://example.com/14",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [
+                {
+                    "default": 42
+                },
+                {
+                    "default": "foo"
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "it should use the first default encountered",
+                "instance": null,
+                "expected": 42
+            }
+        ]
     }
 ]

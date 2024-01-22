@@ -56,6 +56,8 @@ const addDefaultsToObject = (schema, obj) => {
     }
   } else if (schema.type === "array" || schema.prefixItems || schema.items) {
     return addDefaultsToArray(schema, obj);
+  } else if (schema.anyOf) {
+    return addDefaults_anyOf(schema, obj);
   } else {
     return schema.default;
   }
@@ -117,6 +119,16 @@ const addDefaultsToArray = (schema, arr) => {
   return resultantArr;
 };
 
+const addDefaults_anyOf = (schema, obj) => {
+  const objCopy = JSON.parse(JSON.stringify(obj));
+  for (let i = 0; i < schema.anyOf.length; i++) {
+    const result = addDefaultsToObject(schema.anyOf[i], obj);
+    if (result !== objCopy) {
+      return result;
+    }
+  }
+};
+
 const addDefaultsToContains = (schema, instanceArr) => {
   const datatype = dataType(schema);
   for (let i = 0; i < instanceArr.length - 1; i++) {
@@ -170,20 +182,12 @@ const resolveRef = (ref, schema) => {
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-const schema = {
-  $id: "https://example.com/4",
-  $schema: "https://json-schema.org/draft/2020-12/schema",
-  type: "array",
-  contains: {
-    type: "object",
-    properties: {
-      foo: { const: 42 },
-      bar: { default: 24 },
-    },
-    required: ["foo"],
-  },
-};
+// const schema = {
+//   $id: "https://example.com/4",
+//   $schema: "https://json-schema.org/draft/2020-12/schema",
+//   anyOf: [{ default: 42 }, { default: "foo" }],
+// };
 
-const document = [{}, { foo: true }, {}];
-const result = await addDefaults(schema, document);
-console.log(result);
+// const document = null;
+// const result = await addDefaults(schema, document);
+// console.log(result);
