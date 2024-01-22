@@ -56,8 +56,9 @@ const addDefaultsToObject = (schema, obj) => {
     }
   } else if (schema.type === "array" || schema.prefixItems || schema.items) {
     return addDefaultsToArray(schema, obj);
-  } else if (schema.anyOf) {
-    return addDefaults_anyOf(schema, obj);
+  } else if (schema.anyOf || schema.oneOf) {
+    const arr = schema.anyOf ? schema.anyOf : schema.oneOf;
+    return addDefaults_anyOf(arr, obj);
   } else {
     return schema.default;
   }
@@ -119,10 +120,10 @@ const addDefaultsToArray = (schema, arr) => {
   return resultantArr;
 };
 
-const addDefaults_anyOf = (schema, obj) => {
+const addDefaults_anyOf = (arr, obj) => {
   const objCopy = JSON.parse(JSON.stringify(obj));
-  for (let i = 0; i < schema.anyOf.length; i++) {
-    const result = addDefaultsToObject(schema.anyOf[i], obj);
+  for (let i = 0; i < arr.length; i++) {
+    const result = addDefaultsToObject(arr[i], obj);
     if (result !== objCopy) {
       return result;
     }
@@ -185,7 +186,7 @@ const resolveRef = (ref, schema) => {
 // const schema = {
 //   $id: "https://example.com/4",
 //   $schema: "https://json-schema.org/draft/2020-12/schema",
-//   anyOf: [{ default: 42 }, { default: "foo" }],
+//   oneOf: [{ type: "number", default: 42 }, { default: "foo" }],
 // };
 
 // const document = null;

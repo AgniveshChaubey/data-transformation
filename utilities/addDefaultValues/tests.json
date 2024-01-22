@@ -461,5 +461,24 @@
                 "expected": 42
             }
         ]
+    },
+    {
+        "description": "Non-hierarchical ambiguous defaults with oneOf",
+        "schema": {
+            "$id": "https://example.com/15",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [
+                {
+                    "default": 42
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "it should use the first default encountered",
+                "instance": null,
+                "expected": 42
+            }
+        ]
     }
 ]
