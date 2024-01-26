@@ -72,17 +72,11 @@ const addDefaultsToObject = (schema, obj) => {
   if (schema.dependentSchemas) {
     return addDefaults_dependentSchemas(schema, obj);
   }
-  return schema.default || obj;
-};
 
-const addDefaults_dependentSchemas = (schema, obj) => {
-  for (const instanceProperty in schema.dependentSchemas) {
-    const dependentSchema = schema.dependentSchemas[instanceProperty];
-    if (obj.hasOwnProperty(instanceProperty)) {
-      addDefaultsToObject(dependentSchema, obj);
-    }
+  if (schema.propertyDependencies) {
+    return addDefaults_propertyDependencies(schema, obj);
   }
-  return obj;
+  return schema.default || obj;
 };
 
 const addDefaultsToProperties = (schema, properties, obj) => {
@@ -170,6 +164,30 @@ const addDefaults_anyOf = (arr, obj) => {
   }
 };
 
+const addDefaults_dependentSchemas = (schema, obj) => {
+  for (const instanceProperty in schema.dependentSchemas) {
+    const dependentSchema = schema.dependentSchemas[instanceProperty];
+    if (obj.hasOwnProperty(instanceProperty)) {
+      addDefaultsToObject(dependentSchema, obj);
+    }
+  }
+  return obj;
+};
+
+const addDefaults_propertyDependencies = (schema, obj) => {
+  for (const sourceProperty in schema.propertyDependencies) {
+    const dependentSchema = schema.propertyDependencies[sourceProperty];
+    if (
+      obj.hasOwnProperty(sourceProperty) &&
+      dependentSchema.hasOwnProperty(obj[sourceProperty])
+    ) {
+      const defaultValueNode = dependentSchema[obj[sourceProperty]];
+      addDefaultsToObject(defaultValueNode, obj);
+    }
+  }
+  return obj;
+};
+
 const addDefaultsToContains = (schema, instanceArr) => {
   const datatype = dataType(schema);
   for (let i = 0; i < instanceArr.length - 1; i++) {
@@ -231,15 +249,17 @@ const resolveRef = (ref, schema) => {
 //     foo: { type: "string" },
 //     bar: { type: "number" },
 //   },
-//   dependentSchemas: {
+//   propertyDependencies: {
 //     foo: {
-//       properties: {
-//         bar: { default: 42 },
+//       aaa: {
+//         properties: {
+//           bar: { default: 42 },
+//         },
 //       },
 //     },
 //   },
 // };
 
-// const document = { foo: "aa" };
+// const document = {};
 // const result = await addDefaults(schema, document);
 // console.log(result);

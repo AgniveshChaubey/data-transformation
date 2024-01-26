@@ -640,5 +640,53 @@
                 "expected": {}
             }
         ]
+    },
+    {
+        "description": "Conditional defaults with propertyDependencies",
+        "schema": {
+            "$id": "https://example.com/19",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "foo": {
+                    "type": "string"
+                },
+                "bar": {
+                    "type": "number"
+                }
+            },
+            "propertyDependencies": {
+                "foo": {
+                    "aaa": {
+                        "properties": {
+                            "bar": {
+                                "default": 42
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "if the 'foo' property is 'aaa', then the 'bar' property is added",
+                "instance": {
+                    "foo": "aaa"
+                },
+                "expected": {
+                    "foo": "aaa",
+                    "bar": 42
+                }
+            },
+            {
+                "description": "if the 'foo' property is not 'aaa', then the 'bar' property is not added",
+                "instance": {
+                    "foo": "bbb"
+                },
+                "expected": {
+                    "foo": "bbb"
+                }
+            }
+        ]
     }
 ]
