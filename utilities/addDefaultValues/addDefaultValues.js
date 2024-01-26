@@ -78,7 +78,15 @@ const addDefaults_if = async (schema, obj) => {
   const result = await validate(subSchemaPath, obj);
   unregisterSchema(schema.$id);
   if (result.valid) {
-    return addDefaultsToObject(schema.then, obj);
+    let collectDefaults;
+    collectDefaults = addDefaultsToObject(schema.if, obj);
+    if (schema.then) {
+      collectDefaults = {
+        ...collectDefaults,
+        ...addDefaultsToObject(schema.then, obj),
+      };
+    }
+    return collectDefaults;
   } else {
     return addDefaultsToObject(schema.else, obj);
   }
@@ -202,28 +210,24 @@ const resolveRef = (ref, schema) => {
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-// const schema = {
-//   $id: "https://example.com/4",
-//   $schema: "https://json-schema.org/draft/2020-12/schema",
-//   if: {
-//     type: "object",
-//     properties: {
-//       aaa: { const: 42 },
-//     },
-//     required: ["aaa"],
-//   },
-//   then: {
-//     properties: {
-//       bbb: { type: "number", default: "foo" },
-//     },
-//   },
-//   else: {
-//     properties: {
-//       bbb: { default: "bar" },
-//     },
-//   },
-// };
+const schema = {
+  $id: "https://example.com/4",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  if: {
+    type: "object",
+    properties: {
+      aaa: { const: 42 },
+      bbb: { default: "foo" },
+    },
+    required: ["aaa"],
+  },
+  else: {
+    properties: {
+      bbb: { default: "bar" },
+    },
+  },
+};
 
-// const document = { aaa: 11 };
-// const result = await addDefaults(schema, document);
-// console.log(result);
+const document = { aaa: 22 };
+const result = await addDefaults(schema, document);
+console.log(result);
