@@ -69,7 +69,20 @@ const addDefaultsToObject = (schema, obj) => {
     return addDefaults_if(schema, obj);
   }
 
+  if (schema.dependentSchemas) {
+    return addDefaults_dependentSchemas(schema, obj);
+  }
   return schema.default || obj;
+};
+
+const addDefaults_dependentSchemas = (schema, obj) => {
+  for (const instanceProperty in schema.dependentSchemas) {
+    const dependentSchema = schema.dependentSchemas[instanceProperty];
+    if (obj.hasOwnProperty(instanceProperty)) {
+      addDefaultsToObject(dependentSchema, obj);
+    }
+  }
+  return obj;
 };
 
 const addDefaultsToProperties = (schema, properties, obj) => {
@@ -210,24 +223,23 @@ const resolveRef = (ref, schema) => {
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-const schema = {
-  $id: "https://example.com/4",
-  $schema: "https://json-schema.org/draft/2020-12/schema",
-  if: {
-    type: "object",
-    properties: {
-      aaa: { const: 42 },
-      bbb: { default: "foo" },
-    },
-    required: ["aaa"],
-  },
-  else: {
-    properties: {
-      bbb: { default: "bar" },
-    },
-  },
-};
+// const schema = {
+//   $id: "https://example.com/4",
+//   $schema: "https://json-schema.org/draft/2020-12/schema",
+//   type: "object",
+//   properties: {
+//     foo: { type: "string" },
+//     bar: { type: "number" },
+//   },
+//   dependentSchemas: {
+//     foo: {
+//       properties: {
+//         bar: { default: 42 },
+//       },
+//     },
+//   },
+// };
 
-const document = { aaa: 22 };
-const result = await addDefaults(schema, document);
-console.log(result);
+// const document = { foo: "aa" };
+// const result = await addDefaults(schema, document);
+// console.log(result);

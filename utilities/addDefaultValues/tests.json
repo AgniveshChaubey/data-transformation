@@ -598,5 +598,47 @@
                 }
             }
         ]
+    },
+    {
+        "description": "Conditional defaults with dependentSchemas",
+        "schema": {
+            "$id": "https://example.com/18",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "foo": {
+                    "type": "string"
+                },
+                "bar": {
+                    "type": "number"
+                }
+            },
+            "dependentSchemas": {
+                "foo": {
+                    "properties": {
+                        "bar": {
+                            "default": 42
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "if the 'foo' property is present the 'bar' property is added",
+                "instance": {
+                    "foo": "aaa"
+                },
+                "expected": {
+                    "foo": "aaa",
+                    "bar": 42
+                }
+            },
+            {
+                "description": "if the 'foo' property is not present the 'bar' property is not added",
+                "instance": {},
+                "expected": {}
+            }
+        ]
     }
 ]
