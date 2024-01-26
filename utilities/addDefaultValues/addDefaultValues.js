@@ -29,7 +29,7 @@ export const addDefaults = async (schema, document) => {
 
 const parseAndValidateSchema = async (schema, document) => {
   try {
-    registerSchema(schema);
+    registerSchema(schema, schema.$id);
     const result = await validate(schema.$id, document);
 
     const isValid = result.valid;
@@ -54,15 +54,34 @@ const addDefaultsToObject = (schema, obj) => {
     if (schema.additionalProperties) {
       addDefaultsToAdditionalProperties(schema.additionalProperties, obj);
     }
-  } else if (schema.type === "array" || schema.prefixItems || schema.items) {
+  }
+
+  if (schema.type === "array" || schema.prefixItems || schema.items) {
     return addDefaultsToArray(schema, obj);
-  } else if (schema.anyOf || schema.oneOf) {
+  }
+
+  if (schema.anyOf || schema.oneOf) {
     const arr = schema.anyOf ? schema.anyOf : schema.oneOf;
     return addDefaults_anyOf(arr, obj);
-  } else {
-    return schema.default;
   }
-  return obj;
+
+  if (schema.if) {
+    return addDefaults_if(schema, obj);
+  }
+
+  return schema.default || obj;
+};
+
+const addDefaults_if = async (schema, obj) => {
+  registerSchema(schema, schema.$id);
+  const subSchemaPath = `${schema.$id}#/if`;
+  const result = await validate(subSchemaPath, obj);
+  unregisterSchema(schema.$id);
+  if (result.valid) {
+    return addDefaultsToObject(schema.then, obj);
+  } else {
+    return addDefaultsToObject(schema.else, obj);
+  }
 };
 
 const addDefaultsToProperties = (schema, properties, obj) => {
@@ -186,9 +205,25 @@ const resolveRef = (ref, schema) => {
 // const schema = {
 //   $id: "https://example.com/4",
 //   $schema: "https://json-schema.org/draft/2020-12/schema",
-//   oneOf: [{ type: "number", default: 42 }, { default: "foo" }],
+//   if: {
+//     type: "object",
+//     properties: {
+//       aaa: { const: 42 },
+//     },
+//     required: ["aaa"],
+//   },
+//   then: {
+//     properties: {
+//       bbb: { type: "number", default: "foo" },
+//     },
+//   },
+//   else: {
+//     properties: {
+//       bbb: { default: "bar" },
+//     },
+//   },
 // };
 
-// const document = null;
+// const document = { aaa: 11 };
 // const result = await addDefaults(schema, document);
 // console.log(result);

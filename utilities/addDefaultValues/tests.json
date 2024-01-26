@@ -480,5 +480,66 @@
                 "expected": 42
             }
         ]
+    },
+    {
+        "description": "Conditionally add default property",
+        "schema": {
+            "$id": "https://example.com/16",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "if": {
+                "type": "object",
+                "properties": {
+                    "aaa": {
+                        "const": 42
+                    }
+                },
+                "required": [
+                    "aaa"
+                ]
+            },
+            "then": {
+                "properties": {
+                    "bbb": {
+                        "default": "foo"
+                    }
+                }
+            },
+            "else": {
+                "properties": {
+                    "bbb": {
+                        "default": "bar"
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "given 'aaa': 42, the then default applies",
+                "instance": {
+                    "aaa": 42
+                },
+                "expected": {
+                    "aaa": 42,
+                    "bbb": "foo"
+                }
+            },
+            {
+                "description": "given no 'aaa' property, the else default applies",
+                "instance": {},
+                "expected": {
+                    "bbb": "bar"
+                }
+            },
+            {
+                "description": "given a 'aaa' value other than 42, the else default applies",
+                "instance": {
+                    "aaa": 24
+                },
+                "expected": {
+                    "aaa": 24,
+                    "bbb": "bar"
+                }
+            }
+        ]
     }
 ]
