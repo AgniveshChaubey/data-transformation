@@ -551,7 +551,7 @@
                 "type": "object",
                 "properties": {
                     "aaa": {
-                        "const": 42
+                        "const": 20
                     },
                     "bbb": {
                         "default": "foo"
@@ -571,13 +571,30 @@
         },
         "tests": [
             {
-                "description": "given 'aaa': 42, the then default applies",
+                "description": "given 'aaa': 20, the then default applies",
                 "instance": {
-                    "aaa": 42
+                    "aaa": 20
                 },
                 "expected": {
-                    "aaa": 42,
+                    "aaa": 20,
                     "bbb": "foo"
+                }
+            },
+            {
+                "description": "given no 'aaa' property, the else default applies",
+                "instance": {},
+                "expected": {
+                    "bbb": "bar"
+                }
+            },
+            {
+                "description": "given 'aaa' value other than 20, the else default applies",
+                "instance": {
+                    "aaa": 24
+                },
+                "expected": {
+                    "aaa": 24,
+                    "bbb": "bar"
                 }
             }
         ]

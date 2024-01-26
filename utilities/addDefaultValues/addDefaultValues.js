@@ -72,26 +72,6 @@ const addDefaultsToObject = (schema, obj) => {
   return schema.default || obj;
 };
 
-const addDefaults_if = async (schema, obj) => {
-  registerSchema(schema, schema.$id);
-  const subSchemaPath = `${schema.$id}#/if`;
-  const result = await validate(subSchemaPath, obj);
-  unregisterSchema(schema.$id);
-  if (result.valid) {
-    let collectDefaults;
-    collectDefaults = addDefaultsToObject(schema.if, obj);
-    if (schema.then) {
-      collectDefaults = {
-        ...collectDefaults,
-        ...addDefaultsToObject(schema.then, obj),
-      };
-    }
-    return collectDefaults;
-  } else {
-    return addDefaultsToObject(schema.else, obj);
-  }
-};
-
 const addDefaultsToProperties = (schema, properties, obj) => {
   for (const propertyName in properties) {
     const propertyValue = properties[propertyName];
@@ -145,6 +125,26 @@ const addDefaultsToArray = (schema, arr) => {
   }
 
   return resultantArr;
+};
+
+const addDefaults_if = async (schema, obj) => {
+  registerSchema(schema, schema.$id);
+  const subSchemaPath = `${schema.$id}#/if`;
+  const result = await validate(subSchemaPath, obj);
+  unregisterSchema(schema.$id);
+  if (result.valid) {
+    let collectDefaults;
+    collectDefaults = addDefaultsToObject(schema.if, obj);
+    if (schema.then) {
+      collectDefaults = {
+        ...collectDefaults,
+        ...addDefaultsToObject(schema.then, obj),
+      };
+    }
+    return collectDefaults;
+  } else {
+    return addDefaultsToObject(schema.else, obj);
+  }
 };
 
 const addDefaults_anyOf = (arr, obj) => {
