@@ -9,7 +9,8 @@ testData.forEach((testObj, i) => {
     }`, async () => {
       const result = await addDefaults(
         testObj.schema,
-        eachTest.instance
+        eachTest.instance,
+        `-${index + 1}`
       );
       expect(result).toEqual(eachTest.expected);
     });

@@ -5,9 +5,10 @@ import {
 } from "@hyperjump/json-schema/draft-2020-12";
 import { dataType } from "../helpers.js";
 
-export const addDefaults = async (schema, document) => {
+export const addDefaults = async (schema, document, seq) => {
   let parsedSchema;
-  const result = await parseAndValidateSchema(schema, document);
+  const schemaId = schema.$id + seq;
+  const result = await parseAndValidateSchema(schema, document, schemaId);
 
   if (result === "Invalid Json Schema") {
     return "Invalid Json Schema";
@@ -19,7 +20,7 @@ export const addDefaults = async (schema, document) => {
 
   let updatedDocument;
   try {
-    updatedDocument = addDefaultsToObject(parsedSchema, document);
+    updatedDocument = addDefaultsToObject(parsedSchema, document, schemaId);
   } catch (error) {
     console.error("Error adding default values", { cause: error });
     return "Error adding default values";
@@ -27,13 +28,12 @@ export const addDefaults = async (schema, document) => {
   return updatedDocument;
 };
 
-const parseAndValidateSchema = async (schema, document) => {
+const parseAndValidateSchema = async (schema, document, schemaId) => {
   try {
-    registerSchema(schema, schema.$id);
-    const result = await validate(schema.$id, document);
+    registerSchema(schema, schemaId);
+    const result = await validate(schemaId, document);
 
     const isValid = result.valid;
-    unregisterSchema(schema.$id);
 
     return { schema, isValid };
   } catch (error) {
@@ -42,7 +42,7 @@ const parseAndValidateSchema = async (schema, document) => {
   }
 };
 
-const addDefaultsToObject = (schema, obj) => {
+const addDefaultsToObject = (schema, obj, schemaId) => {
   if (
     schema.type === "object" ||
     schema.properties ||
@@ -66,7 +66,7 @@ const addDefaultsToObject = (schema, obj) => {
   }
 
   if (schema.if) {
-    return addDefaults_if(schema, obj);
+    return addDefaults_if(schema, obj, schemaId);
   }
 
   if (schema.dependentSchemas) {
@@ -134,11 +134,9 @@ const addDefaultsToArray = (schema, arr) => {
   return resultantArr;
 };
 
-const addDefaults_if = async (schema, obj) => {
-  registerSchema(schema, schema.$id);
-  const subSchemaPath = `${schema.$id}#/if`;
+const addDefaults_if = async (schema, obj, schemaId) => {
+  const subSchemaPath = `${schemaId}#/if`;
   const result = await validate(subSchemaPath, obj);
-  unregisterSchema(schema.$id);
   if (result.valid) {
     let collectDefaults;
     collectDefaults = addDefaultsToObject(schema.if, obj);
@@ -161,6 +159,12 @@ const addDefaults_anyOf = (arr, obj) => {
     if (result !== objCopy) {
       return result;
     }
+  }
+  for (let i = 0; i < arr.length; i++) {
+    registerSchema(arr[i]);
+    const subSchemaPath = `/oneOf/${arr[i]}`;
+    const result = validate(subSchemaPath, arr[i]);
+    console.log(11111, result);
   }
 };
 
@@ -241,25 +245,27 @@ const resolveRef = (ref, schema) => {
 };
 
 // FOR TESTING PURPOSE -This section will be removed later.
-// const schema = {
-//   $id: "https://example.com/4",
-//   $schema: "https://json-schema.org/draft/2020-12/schema",
-//   type: "object",
-//   properties: {
-//     foo: { type: "string" },
-//     bar: { type: "number" },
-//   },
-//   propertyDependencies: {
-//     foo: {
-//       aaa: {
-//         properties: {
-//           bar: { default: 42 },
-//         },
-//       },
-//     },
-//   },
-// };
+const schema = {
+  $id: "https://example.com/4",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  oneOf: [
+    {
+      not: {
+        type: "object",
+        properties: {
+          aaa: { const: 42 },
+        },
+        required: ["aaa"],
+      },
+    },
+    {
+      properties: {
+        ccc: { default: "foo" },
+      },
+    },
+  ],
+};
 
-// const document = {};
-// const result = await addDefaults(schema, document);
-// console.log(result);
+const document = { aaa: 42, bbb: true };
+const result = await addDefaults(schema, document, 99999);
+console.log(result);

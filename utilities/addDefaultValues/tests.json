@@ -99,7 +99,7 @@
     {
         "description": "Handle invalid schema",
         "schema": {
-            "$id": "https://example.com/5",
+            "$id": "https://example.com/4",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "invalid"
         },
@@ -114,7 +114,7 @@
     {
         "description": "Given a schema with a default set for the required properties",
         "schema": {
-            "$id": "https://example.com/6",
+            "$id": "https://example.com/5",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
@@ -152,7 +152,7 @@
     {
         "description": "Hierarchical ambiguous defaults",
         "schema": {
-            "$id": "https://example.com/7",
+            "$id": "https://example.com/6",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
@@ -180,7 +180,7 @@
     {
         "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
         "schema": {
-            "$id": "https://example.com/8",
+            "$id": "https://example.com/7",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
@@ -208,7 +208,7 @@
     {
         "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
         "schema": {
-            "$id": "https://example.com/9",
+            "$id": "https://example.com/8",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
@@ -235,7 +235,7 @@
     {
         "description": "Undefined item with a default gets added",
         "schema": {
-            "$id": "https://example.com/10",
+            "$id": "https://example.com/9",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "array",
             "prefixItems": [
