@@ -20,3 +20,8 @@ export const dataType = (schema) => {
     return schema.type || typeof schema.default;
   }
 };
+
+export const isLogicalImplication = (oneOf) => {
+  const [subSchema1, subSchema2] = oneOf;
+  return subSchema1.not ? true : false;
+};

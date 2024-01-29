@@ -1,6 +1,8 @@
 {
     "description": "Remove 'foo' property from document which is not mentioned in schema",
     "schema": {
+        "$id": "https://example.com/1000",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
             "name": {

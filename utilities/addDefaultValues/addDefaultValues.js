@@ -1,9 +1,5 @@
-import {
-  registerSchema,
-  unregisterSchema,
-  validate,
-} from "@hyperjump/json-schema/draft-2020-12";
-import { dataType } from "../helpers.js";
+import { registerSchema, validate } from "@hyperjump/json-schema/draft-2020-12";
+import { dataType, isLogicalImplication } from "../helpers.js";
 
 export const addDefaults = async (schema, document, seq) => {
   let parsedSchema;
@@ -62,7 +58,7 @@ const addDefaultsToObject = (schema, obj, schemaId) => {
 
   if (schema.anyOf || schema.oneOf) {
     const arr = schema.anyOf ? schema.anyOf : schema.oneOf;
-    return addDefaults_anyOf(arr, obj);
+    return addDefaults_anyOf(arr, obj, schemaId);
   }
 
   if (schema.if) {
@@ -152,19 +148,16 @@ const addDefaults_if = async (schema, obj, schemaId) => {
   }
 };
 
-const addDefaults_anyOf = (arr, obj) => {
+const addDefaults_anyOf = async (arr, obj, schemaId) => {
+  // if (isLogicalImplication(arr)) {
+  //   return addDefaultsToObject(arr[1], obj);
+  // }
   const objCopy = JSON.parse(JSON.stringify(obj));
   for (let i = 0; i < arr.length; i++) {
     const result = addDefaultsToObject(arr[i], obj);
     if (result !== objCopy) {
       return result;
     }
-  }
-  for (let i = 0; i < arr.length; i++) {
-    registerSchema(arr[i]);
-    const subSchemaPath = `/oneOf/${arr[i]}`;
-    const result = validate(subSchemaPath, arr[i]);
-    console.log(11111, result);
   }
 };
 
@@ -246,7 +239,7 @@ const resolveRef = (ref, schema) => {
 
 // FOR TESTING PURPOSE -This section will be removed later.
 const schema = {
-  $id: "https://example.com/4",
+  $id: "https://example.com/0",
   $schema: "https://json-schema.org/draft/2020-12/schema",
   oneOf: [
     {
@@ -267,5 +260,5 @@ const schema = {
 };
 
 const document = { aaa: 42, bbb: true };
-const result = await addDefaults(schema, document, 99999);
+const result = await addDefaults(schema, document, "-0");
 console.log(result);
