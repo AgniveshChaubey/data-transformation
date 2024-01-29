@@ -1,3 +1,19 @@
+import { registerSchema, validate } from "@hyperjump/json-schema";
+
+export const parseAndValidateSchema = async (schema, document, schemaId) => {
+  try {
+    registerSchema(schema, schemaId);
+    const result = await validate(schemaId, document);
+
+    const isValid = result.valid;
+
+    return { schema, isValid };
+  } catch (error) {
+    console.error("Error validating the Schema", { cause: error });
+    return "Invalid Json Schema";
+  }
+};
+
 export const dataType = (schema) => {
   if (
     schema.type === "object" ||
@@ -21,7 +37,11 @@ export const dataType = (schema) => {
   }
 };
 
-export const isLogicalImplication = (oneOf) => {
-  const [subSchema1, subSchema2] = oneOf;
-  return subSchema1.not ? true : false;
+export const resolveRef = (ref, schema) => {
+  const parts = ref.split("/");
+  let node = schema;
+  for (let i = 1; i < parts.length; i++) {
+    node = node[parts[i]];
+  }
+  return node;
 };

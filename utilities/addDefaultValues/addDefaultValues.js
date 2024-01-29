@@ -1,5 +1,5 @@
-import { registerSchema, validate } from "@hyperjump/json-schema/draft-2020-12";
-import { dataType, isLogicalImplication } from "../helpers.js";
+import { validate } from "@hyperjump/json-schema/draft-2020-12";
+import { dataType, parseAndValidateSchema, resolveRef } from "../helpers.js";
 
 export const addDefaults = async (schema, document, seq) => {
   let parsedSchema;
@@ -24,20 +24,6 @@ export const addDefaults = async (schema, document, seq) => {
   return updatedDocument;
 };
 
-const parseAndValidateSchema = async (schema, document, schemaId) => {
-  try {
-    registerSchema(schema, schemaId);
-    const result = await validate(schemaId, document);
-
-    const isValid = result.valid;
-
-    return { schema, isValid };
-  } catch (error) {
-    console.error("Error validating the Schema", { cause: error });
-    return "Invalid Json Schema";
-  }
-};
-
 const addDefaultsToObject = (schema, obj, schemaId) => {
   if (
     schema.type === "object" ||
@@ -45,37 +31,49 @@ const addDefaultsToObject = (schema, obj, schemaId) => {
     schema.additionalProperties
   ) {
     if (schema.properties) {
-      addDefaultsToProperties(schema, schema.properties, obj);
+      addDefaults_properties(schema, schema.properties, obj);
     }
     if (schema.additionalProperties) {
-      addDefaultsToAdditionalProperties(schema.additionalProperties, obj);
+      addDefaults_additionalProperties(schema.additionalProperties, obj);
     }
   }
-
   if (schema.type === "array" || schema.prefixItems || schema.items) {
     return addDefaultsToArray(schema, obj);
   }
-
   if (schema.anyOf || schema.oneOf) {
     const arr = schema.anyOf ? schema.anyOf : schema.oneOf;
     return addDefaults_anyOf(arr, obj, schemaId);
   }
-
   if (schema.if) {
     return addDefaults_if(schema, obj, schemaId);
   }
-
   if (schema.dependentSchemas) {
     return addDefaults_dependentSchemas(schema, obj);
   }
-
   if (schema.propertyDependencies) {
     return addDefaults_propertyDependencies(schema, obj);
   }
   return schema.default || obj;
 };
 
-const addDefaultsToProperties = (schema, properties, obj) => {
+const addDefaultsToArray = (schema, arr) => {
+  let resultantArr = arr;
+  if (schema.prefixItems) {
+    resultantArr = addDefaults_prefixItems(schema.prefixItems, arr);
+  }
+  if (schema.items) {
+    const prefixArrLength = schema.prefixItems ? schema.prefixItems.length : 0;
+    for (let i = prefixArrLength; i < arr.length; i++) {
+      addDefaultsToObject(schema.items, arr[i]);
+    }
+  }
+  if (schema.contains) {
+    addDefaults_contains(schema.contains, arr);
+  }
+  return resultantArr;
+};
+
+const addDefaults_properties = (schema, properties, obj) => {
   for (const propertyName in properties) {
     const propertyValue = properties[propertyName];
     if (obj[propertyName] === undefined || obj[propertyName] === null) {
@@ -104,30 +102,10 @@ const addDefaultsToProperties = (schema, properties, obj) => {
   return obj;
 };
 
-const addDefaultsToAdditionalProperties = (additionalProps, obj) => {
+const addDefaults_additionalProperties = (additionalProps, obj) => {
   for (const property in obj) {
     addDefaultsToObject(additionalProps, obj[property]);
   }
-};
-
-const addDefaultsToArray = (schema, arr) => {
-  let resultantArr = arr;
-  if (schema.prefixItems) {
-    resultantArr = addDefaultsToPrefixItems(schema.prefixItems, arr);
-  }
-
-  if (schema.items) {
-    const prefixArrLength = schema.prefixItems ? schema.prefixItems.length : 0;
-    for (let i = prefixArrLength; i < arr.length; i++) {
-      addDefaultsToObject(schema.items, arr[i]);
-    }
-  }
-
-  if (schema.contains) {
-    addDefaultsToContains(schema.contains, arr);
-  }
-
-  return resultantArr;
 };
 
 const addDefaults_if = async (schema, obj, schemaId) => {
@@ -148,10 +126,7 @@ const addDefaults_if = async (schema, obj, schemaId) => {
   }
 };
 
-const addDefaults_anyOf = async (arr, obj, schemaId) => {
-  // if (isLogicalImplication(arr)) {
-  //   return addDefaultsToObject(arr[1], obj);
-  // }
+const addDefaults_anyOf = async (arr, obj) => {
   const objCopy = JSON.parse(JSON.stringify(obj));
   for (let i = 0; i < arr.length; i++) {
     const result = addDefaultsToObject(arr[i], obj);
@@ -185,13 +160,11 @@ const addDefaults_propertyDependencies = (schema, obj) => {
   return obj;
 };
 
-const addDefaultsToContains = (schema, instanceArr) => {
+const addDefaults_contains = (schema, instanceArr) => {
   const datatype = dataType(schema);
   for (let i = 0; i < instanceArr.length - 1; i++) {
-    // eslint-disable-next-line no-constant-condition
     if (typeof (instanceArr[i] === datatype)) {
       const allElementsPresent = schema.required.every((element) =>
-        // eslint-disable-next-line no-prototype-builtins
         instanceArr[i].hasOwnProperty(element)
       );
       if (allElementsPresent) {
@@ -201,64 +174,40 @@ const addDefaultsToContains = (schema, instanceArr) => {
   }
 };
 
-const addDefaultsToPrefixItems = (prefixItemsArr, instanceArr) => {
+const addDefaults_prefixItems = (prefixItemsArr, instanceArr) => {
   for (let i = 0; i < prefixItemsArr.length; i++) {
     if (instanceArr[i] === undefined || instanceArr[i] === null) {
       if (prefixItemsArr[i].default) {
         instanceArr[i] = prefixItemsArr[i].default;
       } else return instanceArr;
-    } else if (
-      prefixItemsArr[i].type === "object" ||
-      prefixItemsArr[i].properties
-    ) {
-      instanceArr[i] = {};
-      addDefaultsToObject(prefixItemsArr[i], instanceArr[i]);
-    } else if (
-      prefixItemsArr[i].type === "array" ||
-      prefixItemsArr[i].prefixItems ||
-      prefixItemsArr[i].items
-    ) {
-      addDefaultsToArray(prefixItemsArr[i], instanceArr[i]);
-    } else {
-      addDefaultsToObject(prefixItemsArr[i], instanceArr);
     }
+    addDefaultsToObject(prefixItemsArr[i], instanceArr[i]);
   }
   return instanceArr;
 };
 
-const resolveRef = (ref, schema) => {
-  const parts = ref.split("/");
-  let node = schema;
-
-  for (let i = 1; i < parts.length; i++) {
-    node = node[parts[i]];
-  }
-
-  return node;
-};
-
 // FOR TESTING PURPOSE -This section will be removed later.
-const schema = {
-  $id: "https://example.com/0",
-  $schema: "https://json-schema.org/draft/2020-12/schema",
-  oneOf: [
-    {
-      not: {
-        type: "object",
-        properties: {
-          aaa: { const: 42 },
-        },
-        required: ["aaa"],
-      },
-    },
-    {
-      properties: {
-        ccc: { default: "foo" },
-      },
-    },
-  ],
-};
+// const schema = {
+//   $id: "https://example.com/0",
+//   $schema: "https://json-schema.org/draft/2020-12/schema",
+//   oneOf: [
+//     {
+//       not: {
+//         type: "object",
+//         properties: {
+//           aaa: { const: 42 },
+//         },
+//         required: ["aaa"],
+//       },
+//     },
+//     {
+//       properties: {
+//         ccc: { default: "foo" },
+//       },
+//     },
+//   ],
+// };
 
-const document = { aaa: 42, bbb: true };
-const result = await addDefaults(schema, document, "-0");
-console.log(result);
+// const document = { aaa: 42, bbb: true };
+// const result = await addDefaults(schema, document, "-0");
+// console.log(result);
