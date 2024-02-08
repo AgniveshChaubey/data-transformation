@@ -107,7 +107,7 @@
             {
                 "description": "When the schema is invalid, an error should be thrown",
                 "instance": {},
-                "expected": "Invalid Json Schema"
+                "expected": "InvalidSchemaError: Invalid Schema"
             }
         ]
     },
