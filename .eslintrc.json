@@ -59,6 +59,12 @@
     "no-warning-comments": [
       "warn",
       { "terms": ["todo", "fixme", "xxx"], "location": "start" }
+    ],
+    "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": ["function", "class"], "next": "*" },
+      { "blankLine": "any", "prev": ["function", "class"], "next": ["function", "class"] }
     ]
   }
 }

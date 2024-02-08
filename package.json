@@ -3,7 +3,7 @@
   "name": "data-transformation",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
