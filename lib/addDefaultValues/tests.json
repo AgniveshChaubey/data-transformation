@@ -457,7 +457,6 @@
         "tests": [
             {
                 "description": "it should use the first default encountered",
-                "instance": null,
                 "expected": 42
             }
         ]
@@ -476,7 +475,6 @@
         "tests": [
             {
                 "description": "it should use the first default encountered",
-                "instance": null,
                 "expected": 42
             }
         ]

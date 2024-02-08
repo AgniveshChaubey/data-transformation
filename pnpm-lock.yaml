@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@hyperjump/json-pointer':
+    specifier: ^1.0.1
+    version: 1.0.1
   '@hyperjump/json-schema':
     specifier: ^1.7.0
     version: 1.7.0(@hyperjump/browser@1.1.1)
