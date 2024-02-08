@@ -55,12 +55,46 @@
         },
         "tests": [
             {
-                "description": "When the schema is applied to an empty object, default values should be added to nested properties",
+                "description": "Given an empty object, nothing should be applied",
                 "instance": {},
+                "expected": {}
+            },
+            {
+                "description": "Given 'person' with an empty object, the 'name' and 'age' property is added",
+                "instance": { "person": {} },
                 "expected": {
                     "person": {
                         "name": "John",
                         "age": 25
+                    }
+                }
+            },
+            {
+                "description": "Given an object with the 'age' property not set, the 'age' property is added",
+                "instance": {
+                    "person":{
+                        "name": "Doe"
+                    }
+                },
+                "expected": {
+                    "person": {
+                        "name": "Doe",
+                        "age": 25
+                    }
+                }
+            },
+            {
+                "description": "Given an object with the 'name' and 'age' property already set, the property is unchanged",
+                "instance": {
+                    "person":{
+                        "name": "Rocky",
+                        "age": 49
+                    }
+                },
+                "expected": {
+                    "person": {
+                        "name": "Rocky",
+                        "age": 49
                     }
                 }
             }
