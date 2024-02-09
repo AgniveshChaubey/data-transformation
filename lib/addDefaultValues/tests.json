@@ -1,741 +1,723 @@
 [
-    {
-        "description": "Given a schema with a default set for the 'name' property",
-        "schema": {
-            "$id": "https://example.com/1",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
+  {
+    "description": "Undefined gets default from the root",
+    "schema": {
+      "$id": "https://example.com/0",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "default": 42
+    },
+    "tests": [
+      {
+        "description": "instance is undefined, so default is applied",
+        "expected": 42
+      },
+      {
+        "description": "instance is present, so default is not applied",
+        "instance": "foo",
+        "expected": "foo"
+      },
+      {
+        "description": "null is not undefined",
+        "instance": null,
+        "expected": null
+      },
+      {
+        "description": "0 is not undefined",
+        "instance": 0,
+        "expected": 0
+      },
+      {
+        "description": "false is not undefined",
+        "instance": false,
+        "expected": false
+      },
+      {
+        "description": "empty string is not undefined",
+        "instance": "",
+        "expected": ""
+      },
+      {
+        "description": "empty array is not undefined",
+        "instance": [],
+        "expected": []
+      },
+      {
+        "description": "empty object is not undefined",
+        "instance": {},
+        "expected": {}
+      }
+    ]
+  },
+  {
+    "description": "Given a schema with a default set for the 'name' property",
+    "schema": {
+      "$id": "https://example.com/1",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "Kai"
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "When the schema is applied to an empty object, the name property should be set to default value",
+        "instance": {},
+        "expected": {
+          "name": "Kai"
+        }
+      },
+      {
+        "description": "When the schema is applied to an object where 'name' exists, then the property should not change",
+        "instance": {
+          "name": "John"
+        },
+        "expected": {
+          "name": "John"
+        }
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to nested properties",
+    "schema": {
+      "$id": "https://example.com/2",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "person": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "default": "John"
+            },
+            "age": {
+              "type": "number",
+              "default": 25
+            }
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "Given an empty object, nothing should be applied",
+        "instance": {},
+        "expected": {}
+      },
+      {
+        "description": "Given 'person' with an empty object, the 'name' and 'age' property is added",
+        "instance": { "person": {} },
+        "expected": {
+          "person": {
+            "name": "John",
+            "age": 25
+          }
+        }
+      },
+      {
+        "description": "Given an object with the 'age' property not set, the 'age' property is added",
+        "instance": {
+          "person": { "name": "Doe" }
+        },
+        "expected": {
+          "person": {
+            "name": "Doe",
+            "age": 25
+          }
+        }
+      },
+      {
+        "description": "Given an object with the 'name' and 'age' property already set, the property is unchanged",
+        "instance": {
+          "person": {
+            "name": "Rocky",
+            "age": 49
+          }
+        },
+        "expected": {
+          "person": {
+            "name": "Rocky",
+            "age": 49
+          }
+        }
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to array",
+    "schema": {
+      "$id": "https://example.com/3",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "numbers": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [40]
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "When the schema is applied to an object with an array, default values should be added to array items",
+        "instance": {},
+        "expected": {
+          "numbers": [40]
+        }
+      }
+    ]
+  },
+  {
+    "description": "Handle invalid schema",
+    "schema": {
+      "$id": "https://example.com/4",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "invalid"
+    },
+    "tests": [
+      {
+        "description": "When the schema is invalid, an error should be thrown",
+        "instance": {},
+        "expected": "InvalidSchemaError: Invalid Schema"
+      }
+    ]
+  },
+  {
+    "description": "Given a schema with a default set for the required properties",
+    "schema": {
+      "$id": "https://example.com/5",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "Doe"
+        },
+        "age": {
+          "type": "number",
+          "default": 33
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "When the schema is applied to an empty object, the properties which are present in the required list must set to default value",
+        "instance": {},
+        "expected": {
+          "name": "Doe",
+          "age": 33
+        }
+      },
+      {
+        "description": "When the schema is applied to an object which is already having some properties, the properties which are present in the required list should set to default value without changing the previous properties of the instance",
+        "instance": {
+          "age": 90
+        },
+        "expected": {
+          "name": "Doe",
+          "age": 90
+        }
+      }
+    ]
+  },
+  {
+    "description": "Hierarchical ambiguous defaults",
+    "schema": {
+      "$id": "https://example.com/6",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "foo": {
+          "$ref": "#/$defs/foo",
+          "default": true
+        }
+      },
+      "$defs": {
+        "foo": {
+          "default": 42
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "given an empty object, the property is added",
+        "instance": {},
+        "expected": {
+          "foo": true
+        }
+      }
+    ]
+  },
+  {
+    "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
+    "schema": {
+      "$id": "https://example.com/7",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "foo": {
+          "default": true,
+          "$ref": "#/$defs/foo"
+        }
+      },
+      "$defs": {
+        "foo": {
+          "default": 42
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "given an empty object, the property is added",
+        "instance": {},
+        "expected": {
+          "foo": true
+        }
+      }
+    ]
+  },
+  {
+    "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
+    "schema": {
+      "$id": "https://example.com/8",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "foo": {
+          "$ref": "#/$defs/foo"
+        }
+      },
+      "$defs": {
+        "foo": {
+          "default": 42
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "given an empty object, the property is added",
+        "instance": {},
+        "expected": {
+          "foo": 42
+        }
+      }
+    ]
+  },
+  {
+    "description": "Undefined item with a default gets added",
+    "schema": {
+      "$id": "https://example.com/9",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "prefixItems": [
+        {
+          "default": 42
+        }
+      ]
+    },
+    "tests": [
+      {
+        "description": "given an empty array, the item is added",
+        "instance": [],
+        "expected": [42]
+      },
+      {
+        "description": "given an array with the item already set, the item is unchanged",
+        "instance": ["bar"],
+        "expected": ["bar"]
+      }
+    ]
+  },
+  {
+    "description": "Undefined nested array with a default gets added",
+    "schema": {
+      "$id": "https://example.com/10",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "default": 42
+            }
+          ]
+        }
+      ]
+    },
+    "tests": [
+      {
+        "description": "given an empty array, nothing is added",
+        "instance": [],
+        "expected": []
+      },
+      {
+        "description": "given an item with an empty array, an item is added",
+        "instance": [[]],
+        "expected": [[42]]
+      },
+      {
+        "description": "given an array with the '0' index already set, the item is unchanged",
+        "instance": [[true]],
+        "expected": [[true]]
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to array items",
+    "schema": {
+      "$id": "https://example.com/11",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "prefixItems": [true],
+      "items": {
+        "type": "object",
+        "properties": {
+          "foo": {
+            "default": 42
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "Any items without 'foo' should have the default filled in",
+        "instance": [
+          {},
+          {},
+          {
+            "foo": true
+          },
+          {}
+        ],
+        "expected": [
+          {},
+          {
+            "foo": 42
+          },
+          {
+            "foo": true
+          },
+          {
+            "foo": 42
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to array additional properties",
+    "schema": {
+      "$id": "https://example.com/12",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "prefixItems": [
+          {
+            "default": 42
+          }
+        ]
+      }
+    },
+    "tests": [
+      {
+        "description": "it should fill in the defaults in an additional property",
+        "instance": {
+          "aaa": []
+        },
+        "expected": {
+          "aaa": [42]
+        }
+      },
+      {
+        "description": "it should not apply the default in an additional property if the value is already present",
+        "instance": {
+          "foo": [24]
+        },
+        "expected": {
+          "foo": [24]
+        }
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to array with contains",
+    "schema": {
+      "$id": "https://example.com/13",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "contains": {
+        "type": "object",
+        "properties": {
+          "foo": {
+            "const": 42
+          },
+          "bar": {
+            "default": 24
+          }
+        },
+        "required": ["foo"]
+      }
+    },
+    "tests": [
+      {
+        "description": "it should apply the default to any item where the item matches 'contains'",
+        "instance": [{}, { "foo": 42 }, {}],
+        "expected": [{ "bar": 24 }, { "foo": 42, "bar": 24 }, { "bar": 24 }]
+      },
+      {
+        "description": "it should fill in the defaults even when validation fails",
+        "instance": [{}, { "foo": true }, {}],
+        "expected": [{ "bar": 24 }, { "foo": true, "bar": 24 }, { "bar": 24 }]
+      },
+      {
+        "description": "it should not apply the default if the value is already present",
+        "instance": [{}, { "foo": 42, "bar": false }, {}],
+        "expected": [{ "bar": 24 }, { "foo": 42, "bar": false }, { "bar": 24 }]
+      }
+    ]
+  },
+  {
+    "description": "Non-hierarchical ambiguous defaults with anyOf",
+    "schema": {
+      "$id": "https://example.com/14",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [{ "default": 42 }, { "default": "foo" }]
+    },
+    "tests": [
+      {
+        "description": "it should use the first default encountered",
+        "expected": 42
+      }
+    ]
+  },
+  {
+    "description": "Non-hierarchical ambiguous defaults with oneOf",
+    "schema": {
+      "$id": "https://example.com/15",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "default": 42
+        }
+      ]
+    },
+    "tests": [
+      {
+        "description": "it should use the first default encountered",
+        "expected": 42
+      }
+    ]
+  },
+  {
+    "description": "Conditionally add default property",
+    "schema": {
+      "$id": "https://example.com/16",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "if": {
+        "type": "object",
+        "properties": {
+          "aaa": {
+            "const": 42
+          }
+        },
+        "required": ["aaa"]
+      },
+      "then": {
+        "properties": {
+          "bbb": {
+            "default": "foo"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "bbb": {
+            "default": "bar"
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "given 'aaa': 42, the then default applies",
+        "instance": {
+          "aaa": 42
+        },
+        "expected": {
+          "aaa": 42,
+          "bbb": "foo"
+        }
+      },
+      {
+        "description": "given no 'aaa' property, the else default applies",
+        "instance": {},
+        "expected": {
+          "bbb": "bar"
+        }
+      },
+      {
+        "description": "given a 'aaa' value other than 42, the else default applies",
+        "instance": {
+          "aaa": 24
+        },
+        "expected": {
+          "aaa": 24,
+          "bbb": "bar"
+        }
+      }
+    ]
+  },
+  {
+    "description": "If can add default property",
+    "schema": {
+      "$id": "https://example.com/17",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "if": {
+        "type": "object",
+        "properties": {
+          "aaa": {
+            "const": 20
+          },
+          "bbb": {
+            "default": "foo"
+          }
+        },
+        "required": ["aaa"]
+      },
+      "else": {
+        "properties": {
+          "bbb": {
+            "default": "bar"
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "given 'aaa': 20, the then default applies",
+        "instance": {
+          "aaa": 20
+        },
+        "expected": {
+          "aaa": 20,
+          "bbb": "foo"
+        }
+      },
+      {
+        "description": "given no 'aaa' property, the else default applies",
+        "instance": {},
+        "expected": {
+          "bbb": "bar"
+        }
+      },
+      {
+        "description": "given 'aaa' value other than 20, the else default applies",
+        "instance": {
+          "aaa": 24
+        },
+        "expected": {
+          "aaa": 24,
+          "bbb": "bar"
+        }
+      }
+    ]
+  },
+  {
+    "description": "Conditional defaults with dependentSchemas",
+    "schema": {
+      "$id": "https://example.com/18",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "foo": {
+          "type": "string"
+        },
+        "bar": {
+          "type": "number"
+        }
+      },
+      "dependentSchemas": {
+        "foo": {
+          "properties": {
+            "bar": {
+              "default": 42
+            }
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "if the 'foo' property is present the 'bar' property is added",
+        "instance": {
+          "foo": "aaa"
+        },
+        "expected": {
+          "foo": "aaa",
+          "bar": 42
+        }
+      },
+      {
+        "description": "if the 'foo' property is not present the 'bar' property is not added",
+        "instance": {},
+        "expected": {}
+      }
+    ]
+  },
+  {
+    "description": "Conditional defaults with propertyDependencies",
+    "schema": {
+      "$id": "https://example.com/19",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "foo": {
+          "type": "string"
+        },
+        "bar": {
+          "type": "number"
+        }
+      },
+      "propertyDependencies": {
+        "foo": {
+          "aaa": {
             "properties": {
-                "name": {
-                    "type": "string",
-                    "default": "Kai"
-                }
+              "bar": {
+                "default": 42
+              }
             }
-        },
-        "tests": [
-            {
-                "description": "When the schema is applied to an empty object, the name property should be set to default value",
-                "instance": {},
-                "expected": {
-                    "name": "Kai"
-                }
-            },
-            {
-                "description": "When the schema is applied to an object where 'name' exists, then the property should not change",
-                "instance": {
-                    "name": "John"
-                },
-                "expected": {
-                    "name": "John"
-                }
-            }
-        ]
+          }
+        }
+      }
     },
-    {
-        "description": "Add defaults to nested properties",
-        "schema": {
-            "$id": "https://example.com/2",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "person": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "default": "John"
-                        },
-                        "age": {
-                            "type": "number",
-                            "default": 25
-                        }
-                    }
-                }
-            }
+    "tests": [
+      {
+        "description": "if the 'foo' property is 'aaa', then the 'bar' property is added",
+        "instance": {
+          "foo": "aaa"
         },
-        "tests": [
-            {
-                "description": "Given an empty object, nothing should be applied",
-                "instance": {},
-                "expected": {}
-            },
-            {
-                "description": "Given 'person' with an empty object, the 'name' and 'age' property is added",
-                "instance": { "person": {} },
-                "expected": {
-                    "person": {
-                        "name": "John",
-                        "age": 25
-                    }
-                }
-            },
-            {
-                "description": "Given an object with the 'age' property not set, the 'age' property is added",
-                "instance": {
-                    "person":{
-                        "name": "Doe"
-                    }
-                },
-                "expected": {
-                    "person": {
-                        "name": "Doe",
-                        "age": 25
-                    }
-                }
-            },
-            {
-                "description": "Given an object with the 'name' and 'age' property already set, the property is unchanged",
-                "instance": {
-                    "person":{
-                        "name": "Rocky",
-                        "age": 49
-                    }
-                },
-                "expected": {
-                    "person": {
-                        "name": "Rocky",
-                        "age": 49
-                    }
-                }
-            }
-        ]
-    },
-    {
-        "description": "Add defaults to array",
-        "schema": {
-            "$id": "https://example.com/3",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "numbers": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    },
-                    "default": [
-                        40
-                    ]
-                }
-            }
+        "expected": {
+          "foo": "aaa",
+          "bar": 42
+        }
+      },
+      {
+        "description": "if the 'foo' property is not 'aaa', then the 'bar' property is not added",
+        "instance": {
+          "foo": "bbb"
         },
-        "tests": [
-            {
-                "description": "When the schema is applied to an object with an array, default values should be added to array items",
-                "instance": {},
-                "expected": {
-                    "numbers": [
-                        40
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "description": "Handle invalid schema",
-        "schema": {
-            "$id": "https://example.com/4",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "invalid"
-        },
-        "tests": [
-            {
-                "description": "When the schema is invalid, an error should be thrown",
-                "instance": {},
-                "expected": "InvalidSchemaError: Invalid Schema"
-            }
-        ]
-    },
-    {
-        "description": "Given a schema with a default set for the required properties",
-        "schema": {
-            "$id": "https://example.com/5",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "default": "Doe"
-                },
-                "age": {
-                    "type": "number",
-                    "default": 33
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "When the schema is applied to an empty object, the properties which are present in the required list must set to default value",
-                "instance": {},
-                "expected": {
-                    "name": "Doe",
-                    "age": 33
-                }
-            },
-            {
-                "description": "When the schema is applied to an object which is already having some properties, the properties which are present in the required list should set to default value without changing the previous properties of the instance",
-                "instance": {
-                    "age": 90
-                },
-                "expected": {
-                    "name": "Doe",
-                    "age": 90
-                }
-            }
-        ]
-    },
-    {
-        "description": "Hierarchical ambiguous defaults",
-        "schema": {
-            "$id": "https://example.com/6",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "foo": {
-                    "$ref": "#/$defs/foo",
-                    "default": true
-                }
-            },
-            "$defs": {
-                "foo": {
-                    "default": 42
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "given an empty object, the property is added",
-                "instance": {},
-                "expected": {
-                    "foo": true
-                }
-            }
-        ]
-    },
-    {
-        "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
-        "schema": {
-            "$id": "https://example.com/7",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "foo": {
-                    "default": true,
-                    "$ref": "#/$defs/foo"
-                }
-            },
-            "$defs": {
-                "foo": {
-                    "default": 42
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "given an empty object, the property is added",
-                "instance": {},
-                "expected": {
-                    "foo": true
-                }
-            }
-        ]
-    },
-    {
-        "description": "Hierarchical ambiguous defaults always chooses the top default regardless of evaluation order",
-        "schema": {
-            "$id": "https://example.com/8",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "foo": {
-                    "$ref": "#/$defs/foo"
-                }
-            },
-            "$defs": {
-                "foo": {
-                    "default": 42
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "given an empty object, the property is added",
-                "instance": {},
-                "expected": {
-                    "foo": 42
-                }
-            }
-        ]
-    },
-    {
-        "description": "Undefined item with a default gets added",
-        "schema": {
-            "$id": "https://example.com/9",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "array",
-            "prefixItems": [
-                {
-                    "default": 42
-                }
-            ]
-        },
-        "tests": [
-            {
-                "description": "given an empty array, the item is added",
-                "instance": [],
-                "expected": [
-                    42
-                ]
-            },
-            {
-                "description": "given an array with the item already set, the item is unchanged",
-                "instance": [
-                    "bar"
-                ],
-                "expected": [
-                    "bar"
-                ]
-            }
-        ]
-    },
-    {
-        "description": "Undefined nested array with a default gets added",
-        "schema": {
-            "$id": "https://example.com/10",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "array",
-            "prefixItems": [
-                {
-                    "type": "array",
-                    "prefixItems": [
-                        {
-                            "default": 42
-                        }
-                    ]
-                }
-            ]
-        },
-        "tests": [
-            {
-                "description": "given an empty array, nothing is added",
-                "instance": [],
-                "expected": []
-            },
-            {
-                "description": "given an item with an empty array, an item is added",
-                "instance": [
-                    []
-                ],
-                "expected": [
-                    [
-                        42
-                    ]
-                ]
-            },
-            {
-                "description": "given an array with the '0' index already set, the item is unchanged",
-                "instance": [
-                    [
-                        true
-                    ]
-                ],
-                "expected": [
-                    [
-                        true
-                    ]
-                ]
-            }
-        ]
-    },
-    {
-        "description": "Add defaults to array items",
-        "schema": {
-            "$id": "https://example.com/11",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "array",
-            "prefixItems": [
-                true
-            ],
-            "items": {
-                "type": "object",
-                "properties": {
-                    "foo": {
-                        "default": 42
-                    }
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "Any items without 'foo' should have the default filled in",
-                "instance": [
-                    {},
-                    {},
-                    {
-                        "foo": true
-                    },
-                    {}
-                ],
-                "expected": [
-                    {},
-                    {
-                        "foo": 42
-                    },
-                    {
-                        "foo": true
-                    },
-                    {
-                        "foo": 42
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "description": "Add defaults to array additional properties",
-        "schema": {
-            "$id": "https://example.com/12",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "additionalProperties": {
-                "type": "array",
-                "prefixItems": [
-                    {
-                        "default": 42
-                    }
-                ]
-            }
-        },
-        "tests": [
-            {
-                "description": "it should fill in the defaults in an additional property",
-                "instance": {
-                    "aaa": []
-                },
-                "expected": {
-                    "aaa": [
-                        42
-                    ]
-                }
-            },
-            {
-                "description": "it should not apply the default in an additional property if the value is already present",
-                "instance": {
-                    "foo": [
-                        24
-                    ]
-                },
-                "expected": {
-                    "foo": [
-                        24
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "description": "Add defaults to array with contains",
-        "schema": {
-            "$id": "https://example.com/13",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "array",
-            "contains": {
-                "type": "object",
-                "properties": {
-                    "foo": {
-                        "const": 42
-                    },
-                    "bar": {
-                        "default": 24
-                    }
-                },
-                "required": [
-                    "foo"
-                ]
-            }
-        },
-        "tests": [
-            {
-                "description": "it should apply the default to any item where the item matches 'contains'",
-                "instance": [
-                    {},
-                    { "foo": 42 },
-                    {}
-                ],
-                "expected": [
-                    { "bar": 24 },
-                    { "foo": 42, "bar": 24 },
-                    { "bar": 24 }
-                ]
-            },
-            {
-              "description": "it should fill in the defaults even when validation fails",
-              "instance": [
-                {},
-                { "foo": true },
-                {}
-            ],
-              "expected": [
-                { "bar": 24 },
-                { "foo": true, "bar": 24 },
-                { "bar": 24 }
-            ]
-            },
-            {
-              "description": "it should not apply the default if the value is already present",
-              "instance": [
-                {},
-                { "foo": 42, "bar": false },
-                {}
-            ],
-              "expected": [
-                { "bar": 24 },
-                { "foo": 42, "bar": false },
-                { "bar": 24 }
-            ]
-            }
-        ]
-    },
-    {
-        "description": "Non-hierarchical ambiguous defaults with anyOf",
-        "schema": {
-            "$id": "https://example.com/14",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "anyOf": [
-                { "default": 42 },
-                { "default": "foo" }
-            ]
-        },
-        "tests": [
-            {
-                "description": "it should use the first default encountered",
-                "expected": 42
-            }
-        ]
-    },
-    {
-        "description": "Non-hierarchical ambiguous defaults with oneOf",
-        "schema": {
-            "$id": "https://example.com/15",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "oneOf": [
-                {
-                    "default": 42
-                }
-            ]
-        },
-        "tests": [
-            {
-                "description": "it should use the first default encountered",
-                "expected": 42
-            }
-        ]
-    },
-    {
-        "description": "Conditionally add default property",
-        "schema": {
-            "$id": "https://example.com/16",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "if": {
-                "type": "object",
-                "properties": {
-                    "aaa": {
-                        "const": 42
-                    }
-                },
-                "required": [
-                    "aaa"
-                ]
-            },
-            "then": {
-                "properties": {
-                    "bbb": {
-                        "default": "foo"
-                    }
-                }
-            },
-            "else": {
-                "properties": {
-                    "bbb": {
-                        "default": "bar"
-                    }
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "given 'aaa': 42, the then default applies",
-                "instance": {
-                    "aaa": 42
-                },
-                "expected": {
-                    "aaa": 42,
-                    "bbb": "foo"
-                }
-            },
-            {
-                "description": "given no 'aaa' property, the else default applies",
-                "instance": {},
-                "expected": {
-                    "bbb": "bar"
-                }
-            },
-            {
-                "description": "given a 'aaa' value other than 42, the else default applies",
-                "instance": {
-                    "aaa": 24
-                },
-                "expected": {
-                    "aaa": 24,
-                    "bbb": "bar"
-                }
-            }
-        ]
-    },
-    {
-        "description": "If can add default property",
-        "schema": {
-            "$id": "https://example.com/17",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "if": {
-                "type": "object",
-                "properties": {
-                    "aaa": {
-                        "const": 20
-                    },
-                    "bbb": {
-                        "default": "foo"
-                    }
-                },
-                "required": [
-                    "aaa"
-                ]
-            },
-            "else": {
-                "properties": {
-                    "bbb": {
-                        "default": "bar"
-                    }
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "given 'aaa': 20, the then default applies",
-                "instance": {
-                    "aaa": 20
-                },
-                "expected": {
-                    "aaa": 20,
-                    "bbb": "foo"
-                }
-            },
-            {
-                "description": "given no 'aaa' property, the else default applies",
-                "instance": {},
-                "expected": {
-                    "bbb": "bar"
-                }
-            },
-            {
-                "description": "given 'aaa' value other than 20, the else default applies",
-                "instance": {
-                    "aaa": 24
-                },
-                "expected": {
-                    "aaa": 24,
-                    "bbb": "bar"
-                }
-            }
-        ]
-    },
-    {
-        "description": "Conditional defaults with dependentSchemas",
-        "schema": {
-            "$id": "https://example.com/18",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "foo": {
-                    "type": "string"
-                },
-                "bar": {
-                    "type": "number"
-                }
-            },
-            "dependentSchemas": {
-                "foo": {
-                    "properties": {
-                        "bar": {
-                            "default": 42
-                        }
-                    }
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "if the 'foo' property is present the 'bar' property is added",
-                "instance": {
-                    "foo": "aaa"
-                },
-                "expected": {
-                    "foo": "aaa",
-                    "bar": 42
-                }
-            },
-            {
-                "description": "if the 'foo' property is not present the 'bar' property is not added",
-                "instance": {},
-                "expected": {}
-            }
-        ]
-    },
-    {
-        "description": "Conditional defaults with propertyDependencies",
-        "schema": {
-            "$id": "https://example.com/19",
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "foo": {
-                    "type": "string"
-                },
-                "bar": {
-                    "type": "number"
-                }
-            },
-            "propertyDependencies": {
-                "foo": {
-                    "aaa": {
-                        "properties": {
-                            "bar": {
-                                "default": 42
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "if the 'foo' property is 'aaa', then the 'bar' property is added",
-                "instance": {
-                    "foo": "aaa"
-                },
-                "expected": {
-                    "foo": "aaa",
-                    "bar": 42
-                }
-            },
-            {
-                "description": "if the 'foo' property is not 'aaa', then the 'bar' property is not added",
-                "instance": {
-                    "foo": "bbb"
-                },
-                "expected": {
-                    "foo": "bbb"
-                }
-            }
-        ]
-    }
+        "expected": {
+          "foo": "bbb"
+        }
+      }
+    ]
+  }
 ]
