@@ -458,19 +458,40 @@
                 "description": "it should apply the default to any item where the item matches 'contains'",
                 "instance": [
                     {},
-                    {
-                        "foo": 42
-                    },
+                    { "foo": 42 },
                     {}
                 ],
                 "expected": [
-                    {},
-                    {
-                        "foo": 42,
-                        "bar": 24
-                    },
-                    {}
+                    { "bar": 24 },
+                    { "foo": 42, "bar": 24 },
+                    { "bar": 24 }
                 ]
+            },
+            {
+              "description": "it should fill in the defaults even when validation fails",
+              "instance": [
+                {},
+                { "foo": true },
+                {}
+            ],
+              "expected": [
+                { "bar": 24 },
+                { "foo": true, "bar": 24 },
+                { "bar": 24 }
+            ]
+            },
+            {
+              "description": "it should not apply the default if the value is already present",
+              "instance": [
+                {},
+                { "foo": 42, "bar": false },
+                {}
+            ],
+              "expected": [
+                { "bar": 24 },
+                { "foo": 42, "bar": false },
+                { "bar": 24 }
+            ]
             }
         ]
     },
@@ -480,12 +501,8 @@
             "$id": "https://example.com/14",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
-                {
-                    "default": 42
-                },
-                {
-                    "default": "foo"
-                }
+                { "default": 42 },
+                { "default": "foo" }
             ]
         },
         "tests": [
