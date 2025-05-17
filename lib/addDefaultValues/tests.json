@@ -766,5 +766,45 @@
         "expected": { "aaa": 24 }
       }
     ]
+  },
+  {
+    "description": "Add defaults to patternProperties objects",
+    "schema": {
+      "$id": "https://example.com/21",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "patternProperties": {
+        "^a": {
+          "type": "object",
+          "properties": {
+            "foo": { "default": 42 }
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "Any properties that match the pattern and don't have 'foo' should have the default filled in",
+        "instance": {
+          "abc": {},
+          "def": { "foo": true }
+        },
+        "expected": {
+          "abc": { "foo": 42 },
+          "def": { "foo": true }
+        }
+      },
+      {
+        "description": "Any properties that match the pattern and have 'foo' should remain unchanged",
+        "instance": {
+          "abc": { "foo": 42 },
+          "def": { "foo": true }
+        },
+        "expected": {
+          "abc": { "foo": 42 },
+          "def": { "foo": true }
+        }
+      }
+    ]
   }
 ]
