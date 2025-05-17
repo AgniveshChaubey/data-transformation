@@ -306,6 +306,11 @@
         "expected": {
           "foo": 42
         }
+      },
+      {
+        "description": "given an object with property already set, the property is unchanged",
+        "instance": { "foo": "bar" },
+        "expected": { "foo": "bar" }
       }
     ]
   },
@@ -804,6 +809,40 @@
           "abc": { "foo": 42 },
           "def": { "foo": true }
         }
+      }
+    ]
+  },
+  {
+    "description": "Defaults can be applied through a dynamic reference",
+    "schema": {
+      "$id": "https://example.com/22",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$ref": "main",
+      "$defs": {
+        "foo": {
+          "$id": "default",
+          "$dynamicAnchor": "default",
+          "default": 42
+        },
+        "main": {
+          "$id": "main",
+          "type": "object",
+          "properties": {
+            "foo": { "$dynamicRef": "default" }
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "given an empty object, the property is added",
+        "instance": {},
+        "expected": { "foo": 42 }
+      },
+      {
+        "description": "given an object with property already set, the property is unchanged",
+        "instance": { "foo": "bar" },
+        "expected": { "foo": "bar" }
       }
     ]
   }
