@@ -719,5 +719,52 @@
         }
       }
     ]
+  },
+  {
+    "description": "Conditionally add default property using implication",
+    "schema": {
+      "$id": "https://example.com/20",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "not": {
+            "type": "object",
+            "properties": {
+              "aaa": { "const": 42 }
+            },
+            "required": ["aaa"]
+          }
+        },
+        {
+          "properties": {
+            "ccc": { "default": "foo" }
+          }
+        }
+      ]
+    },
+    "tests": [
+      {
+        "description": "given 'aaa': 42, the default applies",
+        "instance": {
+          "aaa": 42,
+          "bbb": true
+        },
+        "expected": {
+          "aaa": 42,
+          "bbb": true,
+          "ccc": "foo"
+        }
+      },
+      {
+        "description": "given no 'aaa' property, the default doesn't apply",
+        "instance": {},
+        "expected": {}
+      },
+      {
+        "description": "given an 'aaa' value other than 42, the default doesn't apply",
+        "instance": { "aaa": 24 },
+        "expected": { "aaa": 24 }
+      }
+    ]
   }
 ]
