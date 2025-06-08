@@ -860,5 +860,20 @@
         "description": "it should not apply a default"
       }
     ]
+  },
+  {
+    "description": "Defaults with not are ignored",
+    "schema": {
+      "$id": "https://example.com/24",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "not": {
+        "not": { "default": 42 }
+      }
+    },
+    "tests": [
+      {
+        "description": "it should not apply a default"
+      }
+    ]
   }
 ]
