@@ -862,17 +862,121 @@
     ]
   },
   {
-    "description": "Defaults with not are ignored",
+    "description": "Add defaults to unevaluatedProperties objects",
     "schema": {
       "$id": "https://example.com/24",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "not": {
-        "not": { "default": 42 }
+      "unevaluatedProperties": {
+        "type": "object",
+        "properties": {
+          "foo": { "default" : "bar" }
+        }
       }
     },
     "tests": [
       {
-        "description": "it should not apply a default"
+        "description": "properties that are unevaluated and don't have 'foo' should have the default filled in",
+        "instance": {
+          "abc": {},
+          "def": { "foo": true }
+        },
+        "expected": {
+          "abc": { "foo": "bar" },
+          "def": { "foo": true }
+        }
+      },
+      {
+        "description": "properties that are unevaluated and have 'foo' should remain unchanged",
+        "instance": {
+          "abc": { "foo": 42 },
+          "def": { "foo": true }
+        },
+        "expected": {
+          "abc": { "foo": 42 },
+          "def": { "foo": true }
+        }
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to array unevaluated properties",
+    "schema": {
+      "$id": "https://example.com/25",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "unevaluatedProperties": {
+        "type": "array",
+        "prefixItems": [
+          {
+            "default": 42
+          }
+        ]
+      }
+    },
+    "tests": [
+      {
+        "description": "it should fill in the defaults in an unevaluated property",
+        "instance": {
+          "aaa": []
+        },
+        "expected": {
+          "aaa": [42]
+        }
+      },
+      {
+        "description": "it should not apply the default in an unevaluated property if the value is already present",
+        "instance": {
+          "foo": [24]
+        },
+        "expected": {
+          "foo": [24]
+        }
+      }
+    ]
+  },
+  {
+    "description": "'unevaluatedProperties' keyword with 'allOf' keyword",
+    "schema": {
+      "$id": "https://example.com/26",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "allOf": [
+        { "properties": { "foo": true } }
+      ],
+      "unevaluatedProperties": {
+        "type": "object",
+        "properties": {
+          "bar": {"default" : "baz" }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "it should fill in the defaults in an unevaluated property",
+        "instance": { "abc": {} },
+        "expected": {
+          "abc": { "bar": "baz" }
+        }
+      },
+      {
+        "description": "properties that are unevaluated and have 'bar' should remain unchanged",
+        "instance": {
+          "abc": { "bar": 42 }
+        },
+        "expected": {
+          "abc": { "bar": 42 }
+        }
+      },
+      {
+        "description": "if a child or an adjcent subschema is applied to an instance property, unevaluatedProperties subschema must not apply to it (as unevaluatedProperties can see insde child and adjacent subschemas)",
+        "instance": {
+          "foo": {},
+          "abc": {}
+        },
+        "expected": {
+          "foo": {},
+          "abc": { "bar": "baz" }
+        }
       }
     ]
   }
