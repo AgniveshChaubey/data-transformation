@@ -678,6 +678,20 @@
     ]
   },
   {
+    "description": "",
+    "schema": {
+      "$id": "https://example.com/19",
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "tests": [
+      {
+        "description": "",
+        "instance": {},
+        "expected": {}
+      }
+    ]
+  },
+  {
     "description": "Conditionally add default property using implication",
     "schema": {
       "$id": "https://example.com/20",
@@ -929,6 +943,94 @@
           "foo": {},
           "abc": { "bar": "baz" }
         }
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to unevaluated array items",
+    "schema": {
+      "$id": "https://example.com/27",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "prefixItems": [true],
+      "unevaluatedItems": {
+        "type": "object",
+        "properties": {
+          "foo": {
+            "default": 42
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "Any items without 'foo' should have the default filled in",
+        "instance": [ {}, {}, { "foo": true }, {} ],
+        "expected": [ {}, { "foo": 42 }, { "foo": true }, { "foo": 42 } ]
+      }
+    ]
+  },
+  {
+    "description": "Unevaluated nested array with a default gets added",
+    "schema": {
+      "$id": "https://example.com/28",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "prefixItems": [true],
+      "unevaluatedItems": {
+        "type": "array",
+        "prefixItems": [
+          {
+            "default": 42
+          }
+        ]
+      }
+    },
+    "tests": [
+      {
+        "description": "given an unevaluated item with an empty array, the default should be filled in",
+        "instance": [[], [], {}],
+        "expected": [[], [42], {}]
+      },
+      {
+        "description": "given an unevaluated item with an array whose index 0 is already set, the item should remain unchanged",
+        "instance": [false, ["foo"]],
+        "expected": [false, ["foo"]]
+      }
+    ]
+  },
+  {
+    "description": "'unevaluatedItems' with 'allOf' keyword",
+    "schema": {
+      "$id": "https://example.com/29",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "allOf": [
+        { 
+          "prefixItems": [ true ]
+        }
+      ],
+      "unevaluatedItems": {
+        "prefixItems": [
+          { "default": "foo" }
+        ]
+      }
+    },
+    "tests": [
+      {
+        "description": "given an unevaluated item with an empty array, the default should be filled in",
+        "instance": [42, []],
+        "expected": [42, ["foo"]]
+      },
+      {
+        "description": "given an unevaluated item with an array whose index 0 is already set, the item should remain unchanged",
+        "instance": [42, [true]],
+        "expected": [42, [true]]
+      },
+      {
+        "description": "if a child or an adjcent subschema is applied to an array index, 'unevaluatedItems' subschema must not apply to it (as 'unevaluatedItems' can see insde child and adjacent subschemas)",
+        "instance": [[], [], []],
+        "expected": [[], ["foo"], ["foo"]]
       }
     ]
   }
