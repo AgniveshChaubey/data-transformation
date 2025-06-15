@@ -947,9 +947,55 @@
     ]
   },
   {
-    "description": "Add defaults to unevaluated array items",
+    "description": "nested 'unevaluatedProperties' keywords",
     "schema": {
       "$id": "https://example.com/27",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "allOf": [
+        { "properties": { "foo": true } }
+      ],
+      "unevaluatedProperties": {
+        "type": "object",
+        "properties": {
+          "bar": {"default" : "baz" }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "it should fill in the defaults in an unevaluated property",
+        "instance": { "abc": {} },
+        "expected": {
+          "abc": { "bar": "baz" }
+        }
+      },
+      {
+        "description": "properties that are unevaluated and have 'bar' should remain unchanged",
+        "instance": {
+          "abc": { "bar": 42 }
+        },
+        "expected": {
+          "abc": { "bar": 42 }
+        }
+      },
+      {
+        "description": "if a child or an adjcent subschema is applied to an instance property, unevaluatedProperties subschema must not apply to it (as unevaluatedProperties can see insde child and adjacent subschemas)",
+        "instance": {
+          "foo": {},
+          "abc": {}
+        },
+        "expected": {
+          "foo": {},
+          "abc": {}
+        }
+      }
+    ]
+  },
+  {
+    "description": "Add defaults to unevaluated array items",
+    "schema": {
+      "$id": "https://example.com/28",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "array",
       "prefixItems": [true],
@@ -973,7 +1019,7 @@
   {
     "description": "Unevaluated nested array with a default gets added",
     "schema": {
-      "$id": "https://example.com/28",
+      "$id": "https://example.com/29",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "array",
       "prefixItems": [true],
@@ -1002,7 +1048,7 @@
   {
     "description": "'unevaluatedItems' with 'allOf' keyword",
     "schema": {
-      "$id": "https://example.com/29",
+      "$id": "https://example.com/30",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "array",
       "allOf": [
