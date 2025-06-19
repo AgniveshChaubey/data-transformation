@@ -953,7 +953,8 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "allOf": [
-        { "properties": { "foo": true } }
+        { "properties": { "foo": true } },
+        { "unevaluatedProperties": true }
       ],
       "unevaluatedProperties": {
         "type": "object",
@@ -964,30 +965,17 @@
     },
     "tests": [
       {
-        "description": "it should fill in the defaults in an unevaluated property",
+        "description": "if a property has already been evaluated, the outer 'unevaluatedProperties' subschema must not apply to it",
         "instance": { "abc": {} },
-        "expected": {
-          "abc": { "bar": "baz" }
-        }
+        "expected": { "abc": {} }
       },
       {
-        "description": "properties that are unevaluated and have 'bar' should remain unchanged",
+        "description": "if a property has already been evaluated, the outer 'unevaluatedProperties' subschema must not apply to it",
         "instance": {
           "abc": { "bar": 42 }
         },
         "expected": {
           "abc": { "bar": 42 }
-        }
-      },
-      {
-        "description": "if a child or an adjcent subschema is applied to an instance property, unevaluatedProperties subschema must not apply to it (as unevaluatedProperties can see insde child and adjacent subschemas)",
-        "instance": {
-          "foo": {},
-          "abc": {}
-        },
-        "expected": {
-          "foo": {},
-          "abc": {}
         }
       }
     ]
@@ -1077,6 +1065,37 @@
         "description": "if a child or an adjcent subschema is applied to an array index, 'unevaluatedItems' subschema must not apply to it (as 'unevaluatedItems' can see insde child and adjacent subschemas)",
         "instance": [[], [], []],
         "expected": [[], ["foo"], ["foo"]]
+      }
+    ]
+  },
+  {
+    "description": "nested 'unevaluatedItems' keywords",
+    "schema": {
+      "$id": "https://example.com/31",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "array",
+      "allOf": [
+        { 
+          "prefixItems": [ true ]
+        },
+        { "unevaluatedItems": true }
+      ],
+      "unevaluatedItems": {
+        "prefixItems": [
+          { "default": "foo" }
+        ]
+      }
+    },
+    "tests": [
+      {
+        "description": "if an array item has already been evaluated, the outer 'unevaluatedItems' subschema must not apply to it",
+        "instance": [42, []],
+        "expected": [42, []]
+      },
+      {
+        "description": "if an array item has already been evaluated, the outer 'unevaluatedItems' subschema must not apply to it",
+        "instance": [42, [true]],
+        "expected": [42, [true]]
       }
     ]
   }
