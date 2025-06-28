@@ -277,6 +277,499 @@
           ]
         }
       ]
+    },
+    {
+      "description": "schema with 'prefixItems' and 'contains'",
+      "schema": {
+        "$id": "https://example.com/8",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "prefixItems": [
+            { "type": "number" }
+        ],
+        "contains": {
+          "type": "string"
+        }
+      },
+      "tests": [
+        {
+          "description": "it should remove the items where 'prefixItems' or 'contains' subschema is not applied",
+          "instance": [42, 7, "foo", true, "bar"],
+          "expected": [42, "foo", "bar"]
+        },
+        {
+          "description": "an array with only 42 and 'foo' should remain unchanged",
+          "instance": [42, "foo"],
+          "expected": [42, "foo"]
+        }
+      ]
+    },
+    {
+        "description": "schema with if/then/else",
+        "schema": {
+            "$id": "https://example.com/9",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "if": {
+            "type": "object",
+            "properties": {
+                "aaa": {
+                "const": 42
+                }
+            },
+            "required": ["aaa"]
+            },
+            "then": {
+            "properties": {
+                "bbb": {
+                "type": "string"
+                }
+            }
+            },
+            "else": {
+            "properties": {
+                "ccc": {
+                "type": "string"
+                }
+            }
+            }
+        },
+        "tests": [
+            {
+            "description": "given 'aaa': 42, the then schema applies",
+            "instance": {
+                "aaa": 42,
+                "bbb": "foo",
+                "ccc": "bar"
+            },
+            "expected": {
+                "aaa": 42,
+                "bbb": "foo"
+            }
+            },
+            {
+            "description": "given 'aaa' provalueperty other than 42, the else schema applies",
+            "instance": {
+                "aaa": 24,
+                "bbb": "foo",
+                "ccc": "bar"
+            },
+            "expected": {
+                "aaa": 24,
+                "ccc": "bar"
+            }
+            },
+            {
+            "description": "given no 'aaa' property, the else default applies",
+            "instance": {
+                "bbb": "foo",
+                "ccc": "bar"
+            },
+            "expected": {
+                "ccc": "bar"
+            }
+            }
+        ]
+    },
+    {
+      "description": "schema with dependentSchemas",
+      "schema": {
+        "$id": "https://example.com/10",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "foo": {
+            "type": "string"
+          }
+        },
+        "dependentSchemas": {
+          "foo": {
+            "properties": {
+              "bar": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "tests": [
+        {
+          "description": "if the 'foo' property is present, properties other than those defined in the dependent schema are removed",
+          "instance": {
+            "foo": "aaa",
+            "bar": 42,
+            "baz": "qux"
+          },
+          "expected": {
+            "foo": "aaa",
+            "bar": 42
+          }
+        },
+        {
+          "description": "if the 'foo' property is not present, then the 'bar' property is unevaluated and hence removed",
+          "instance": {
+            "bar": 42,
+            "baz": "qux"
+          },
+          "expected": {}
+        }
+      ]
+    },
+    {
+      "description": "schema with patternProperties keyword",
+      "schema": {
+        "$id": "https://example.com/11",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "patternProperties": {
+          "^a": {
+            "type": "string"
+          }
+        }
+      },
+      "tests": [
+        {
+          "description": "Any properties that don't match the pattern and should be removed",
+          "instance": {
+            "abc": "foo",
+            "def": { "bar": true }
+          },
+          "expected": { "abc": "foo" }
+        },
+        {
+          "description": "if there is no extra property, the instance should remain unchanged",
+          "instance": { "abc": "foo" },
+          "expected": { "abc": "foo" }
+        }
+      ]
+    },
+    {
+        "description": "schema with $ref/$defs keyword",
+        "schema": {
+          "$id": "https://example.com/12",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "foo": {
+              "$ref": "#/$defs/foo"
+            }
+          },
+          "$defs": {
+            "foo": { "type": "number" }
+          }
+        },
+        "tests": [
+          {
+            "description": "given an empty object, it should remain unchanged",
+            "instance": {},
+            "expected": {}
+          },
+          {
+            "description": "if an object has properties other than foo, those properties should be removed",
+            "instance": {
+              "foo": 42,
+              "bar": "baz"
+            },
+            "expected": { "foo": 42 }
+          }
+        ]
+    },
+    {
+      "description": "schema with dynamic reference",
+      "schema": {
+        "$id": "https://example.com/13",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$ref": "main",
+        "$defs": {
+          "foo": {
+            "$id": "default",
+            "$dynamicAnchor": "default",
+            "type": "number"
+          },
+          "main": {
+            "$id": "main",
+            "type": "object",
+            "properties": {
+              "foo": { "$dynamicRef": "default" }
+            }
+          }
+        }
+      },
+      "tests": [
+        {
+          "description": "given an empty object, it should remain unchanged",
+          "instance": {},
+          "expected": {}
+        },
+        {
+          "description": "if an object has properties other than foo, those properties should be removed",
+          "instance": {
+            "foo": 42,
+            "bar": "baz"
+          },
+          "expected": { "foo": 42 }
+        }
+      ]
+    },
+    {
+      "description": "schema with unevaluatedProperties keywrord",
+      "schema": {
+        "$id": "https://example.com/14",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "unevaluatedProperties": {
+          "type": "number"
+        }
+      },
+      "tests": [
+        {
+          "description": "if unevaluated properties comply with the unevaluatedProperties subschema, the instance should remain unchanged",
+          "instance": {
+            "abc": 42,
+            "def": 24
+          },
+          "expected": {
+            "abc": 42,
+            "def": 24
+          }
+        },
+        {
+          "description": "if unevaluated properties do not comply with the unevaluatedProperties subschema, they should be removed",
+          "instance": {
+            "abc": 42,
+            "def": "bar",
+            "foo": 24
+          },
+          "expected": {
+            "abc": 42,
+            "foo": 24
+          }
+        }
+      ]
+    },
+    {
+      "description": "schema with object unevaluated properties",
+      "schema": {
+        "$id": "https://example.com/15",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "unevaluatedProperties": {
+          "type": "object",
+          "properties": {
+            "foo": { "type": "number" }
+          }
+        }
+      },
+      "tests": [
+        {
+          "description": "undefined properties should be removed from unevaluated object",
+          "instance": {
+            "aaa": { 
+              "foo": 42,
+              "bar": "baz"
+            }
+          },
+          "expected": {
+            "aaa": { "foo": 42 }
+          }
+        },
+        {
+          "description": "if an unevaluated object does not comply with the unevaluatedProperties subschema, it should be removed",
+          "instance": {
+            "aaa": [24],
+            "bbb": { "foo": 42 }
+          },
+          "expected": {
+            "bbb": { "foo": 42 }
+          }
+        }
+      ]
+    },
+    {
+      "description": "schema with array unevaluated properties",
+      "schema": {
+        "$id": "https://example.com/16",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "unevaluatedProperties": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "tests": [
+        {
+          "description": "undefined items should be removed from unevaluated object",
+          "instance": {
+            "aaa": [42, false, "foo"]
+          },
+          "expected": {
+            "aaa": [42]
+          }
+        },
+        {
+          "description": "if an unevaluated item does not comply with the unevaluatedProperties subschema, it should be removed",
+          "instance": {
+            "aaa": [42],
+            "bbb": { "foo": 24 }
+          },
+          "expected": {
+            "aaa": [42]
+          }
+        }
+      ]
+    },
+    {
+      "description": "'unevaluatedProperties' keyword with 'allOf' keyword",
+      "schema": {
+        "$id": "https://example.com/17",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "allOf": [
+          { "properties": { "foo": true } }
+        ],
+        "unevaluatedProperties": { "type": "boolean" }
+      },
+      "tests": [
+        {
+          "description": "unevaluated properties should be removed if they do not comply with the unevaluatedProperties subschema",
+          "instance": {
+            "abc": {},
+            "foo": 42
+          },
+          "expected": { "foo": 42 }
+        },
+        {
+          "description": "if an unevaluated property complies with the unevaluatedProperties subschema, it should remain unchanged",
+          "instance": {
+            "abc": false,
+            "foo": true
+          },
+          "expected": {
+            "abc": false,
+            "foo": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "nested 'unevaluatedProperties' keywords",
+      "schema": {
+        "$id": "https://example.com/18",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "allOf": [
+          { "properties": { "foo": true } },
+          { "unevaluatedProperties": true }
+        ],
+        "unevaluatedProperties": {
+          "type": "object",
+          "properties": {
+            "bar": { "type" : "string" }
+          }
+        }
+      },
+      "tests": [
+        {
+          "description": "if a property has already been evaluated, the outer 'unevaluatedProperties' subschema must not apply to it",
+          "instance": { "abc": 42 },
+          "expected": { "abc": 42 }
+        },
+        {
+          "description": "if a property has already been evaluated, the outer 'unevaluatedProperties' subschema must not apply to it",
+          "instance": { "abc": false },
+          "expected": { "abc": false }
+        }
+      ]
+    },
+    {
+      "description": "schema with unevaluatedItems keyword",
+      "schema": {
+        "$id": "https://example.com/19",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "prefixItems": [true],
+        "unevaluatedItems": { "type": "number" }
+      },
+      "tests": [
+        {
+          "description": "unevaluated items that do not comply with the unevaluatedItems subschema should be removed",
+          "instance": [ {}, 42, "foo", true, 24 ],
+          "expected": [ {}, 42, 24 ]
+        },
+        {
+          "description": "if unevaluated items comply with the unevaluatedItems subschema, the array should remain unchanged",
+          "instance": [ [], 42, 24 ],
+          "expected": [ [], 42, 24 ]
+        }
+      ]
+    },
+    {
+      "description": "schema with unevaluated array items",
+      "schema": {
+        "$id": "https://example.com/20",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "prefixItems": [true],
+        "unevaluatedItems": {
+          "type": "object",
+          "properties": {
+            "foo": { "type": "number" }
+          }
+        }
+      },
+      "tests": [
+        {
+          "description": "undefined properties in an unevaluated array item should be removed",
+          "instance": [
+            {
+            "foo": "bar",
+            "abc": "baz"
+            },
+            {
+              "foo": 42,
+              "bar": "baz"
+            }
+          ],
+          "expected": [
+            {
+              "foo": "bar",
+              "abc": "baz"
+              },
+              {
+                "foo": 42
+              }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "'unevaluatedItems' with 'allOf' keyword",
+      "schema": {
+        "$id": "https://example.com/21",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "allOf": [
+          { 
+            "prefixItems": [ true ]
+          }
+        ],
+        "unevaluatedItems": { "type": "number" }
+      },
+      "tests": [
+        {
+          "description": "given an unevaluated item that does not comply with the unevaluatedItems subschema, it should be removed",
+          "instance": [42, [true]],
+          "expected": [42]
+        },
+        {
+          "description": "if a child or an adjcent subschema is applied to an array index, 'unevaluatedItems' subschema must not apply to it",
+          "instance": [["foo"], 42, [false]],
+          "expected": [["foo"], 42]
+        }
+      ]
     }
   ]
   
