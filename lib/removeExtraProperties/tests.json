@@ -527,7 +527,7 @@
   {
     "description": "Schema with property definitions using patternProperties",
     "schema": {
-      "$id": "https://example.com/12",
+      "$id": "https://example.com/12.1",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "patternProperties": {
@@ -554,6 +554,47 @@
         },
         "expected": {
           "foo": "bar"
+        }
+      }
+    ]
+  },
+  {
+    "description": "Schema with property definitions using patternProperties",
+    "schema": {
+      "$id": "https://example.com/12.2",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "patternProperties": {
+        "^f": {
+          "type": "string"
+        },
+        "^b": {
+          "type": "number"
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "properties not matching any pattern are removed",
+        "instance": {
+          "foo": "bar",
+          "baz": 42,
+          "qux": true
+        },
+        "expected": {
+          "foo": "bar",
+          "baz": 42
+        }
+      },
+      {
+        "description": "when all properties are defined by patternProperties, the instance remains unchanged",
+        "instance": {
+          "foo": "bar",
+          "baz": 42
+        },
+        "expected": {
+          "foo": "bar",
+          "baz": 42
         }
       }
     ]
